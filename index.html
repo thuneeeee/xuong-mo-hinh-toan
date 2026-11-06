@@ -1,0 +1,1860 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Xưởng Mô Hình Toán</title>
+<meta name="description" content="Các bài mô hình hóa toán học tương tác theo sách Toán Kết nối tri thức 10–12, kèm công cụ dán đề để Gemini dựng mô hình.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&family=Patrick+Hand&display=swap">
+<style>
+/* Layout: trang vở ô li; thẻ chọn bài ở đầu, mô phỏng bên trái, chu trình 4 bước bên phải (xếp dọc trên điện thoại).
+   Sáng: mực bút bi xanh + bút đỏ của thầy cô. Tối: bảng xanh, phấn vàng. */
+:root{
+  --paper:#f5f7fc;
+  --grid-minor:#eaeef8;
+  --grid-major:#d7def1;
+  --panel:#ffffff;
+  --line:#cdd5ea;
+  --ink:#17203b;
+  --ink-soft:#56607d;
+  --accent:#2340c8;
+  --accent-soft:#e3e8fc;
+  --accent-ink:#ffffff;
+  --red:#cc3325;
+  --red-soft:#fbe2dd;
+  --good:#167c47; --good-soft:#dcf2e5;
+  --warn:#94600c; --warn-soft:#fbeed6;
+  --box-r:#c6d0f4; --box-l:#a8b7ec; --box-in:#eef1fc; --box-in2:#dce3fa;
+  --plot-grid:#e8ecf6; --plot-grid-major:#d3daee;
+  --font-display:"Bricolage Grotesque","Be Vietnam Pro",system-ui,sans-serif;
+  --font-body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-hand:"Patrick Hand","Segoe Print","Comic Sans MS",cursive;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --font-math:"Cambria Math",Cambria,"Times New Roman",Times,serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#122019; --grid-minor:#172a20; --grid-major:#1f3529;
+    --panel:#18291f; --line:#2e4639;
+    --ink:#eef2e7; --ink-soft:#a5b5a8;
+    --accent:#f1d36c; --accent-soft:#2f3d26; --accent-ink:#18291f;
+    --red:#ff9282; --red-soft:#3b2823;
+    --good:#88dba8; --good-soft:#1d3a2a; --warn:#f3c66e; --warn-soft:#3a3220;
+    --box-r:#3f5b4b; --box-l:#30483b; --box-in:#20342a; --box-in2:#294034;
+    --plot-grid:#203328; --plot-grid-major:#2b4436;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#122019; --grid-minor:#172a20; --grid-major:#1f3529;
+  --panel:#18291f; --line:#2e4639;
+  --ink:#eef2e7; --ink-soft:#a5b5a8;
+  --accent:#f1d36c; --accent-soft:#2f3d26; --accent-ink:#18291f;
+  --red:#ff9282; --red-soft:#3b2823;
+  --good:#88dba8; --good-soft:#1d3a2a; --warn:#f3c66e; --warn-soft:#3a3220;
+  --box-r:#3f5b4b; --box-l:#30483b; --box-in:#20342a; --box-in2:#294034;
+  --plot-grid:#203328; --plot-grid-major:#2b4436;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html{-webkit-text-size-adjust:100%}
+img{max-width:100%}
+a{color:var(--accent)}
+body{
+  background-color:var(--paper);
+  background-image:
+    linear-gradient(var(--grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(var(--grid-minor) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px);
+  background-size:32px 32px,32px 32px,8px 8px,8px 8px;
+  color:var(--ink);
+  font:15px/1.6 var(--font-body);
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:0;
+  margin:0;
+}
+.wrap{max-width:1180px;margin-inline:auto}
+header.top{padding-block:28px 22px}
+.eyebrow{font:600 0.74rem/1.4 var(--font-mono);letter-spacing:0.08em;text-transform:uppercase;color:var(--red);margin:0 0 8px}
+h1{font:800 clamp(2.1rem,5.2vw,3.5rem)/1.04 var(--font-display);letter-spacing:-0.025em;margin:0;text-wrap:balance}
+h1 .hand{font-family:var(--font-hand);font-weight:400;letter-spacing:0;color:var(--accent)}
+.lede{max-width:62ch;color:var(--ink-soft);margin:10px 0 0;font-size:1rem}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:22px}
+@media (max-width:980px){.tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tab.tool:not([aria-current="page"]){border-style:dashed;border-color:var(--accent)}
+.tab{display:grid;gap:2px;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);text-decoration:none;transition:border-color .15s,background-color .15s}
+.tab:hover{border-color:var(--accent)}
+.tab .grade{font:600 0.72rem/1.4 var(--font-mono);letter-spacing:0.07em;text-transform:uppercase;color:var(--ink-soft)}
+.tab .tname{font:600 1.1rem/1.3 var(--font-display)}
+.tab .chap{font-size:0.82rem;color:var(--ink-soft)}
+.tab[aria-current="page"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.tab[aria-current="page"] .grade,.tab[aria-current="page"] .chap{color:var(--accent-ink);opacity:.85}
+@media (max-width:640px){
+  .tabs{grid-template-columns:minmax(0,1fr)}
+  .tab{grid-template-columns:auto minmax(0,1fr);column-gap:14px}
+  .tab .grade{grid-row:span 2;align-self:center}
+}
+main{padding-bottom:28px}
+.problem{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:920px){.problem{grid-template-columns:minmax(0,1fr)}}
+.stage,.cycle{background:var(--panel);border:1px solid var(--line);border-radius:12px;min-width:0}
+.stage{padding:16px;display:flex;flex-direction:column;gap:14px}
+.cycle{padding:18px;display:flex;flex-direction:column;gap:14px}
+@media (min-width:921px){.cycle{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}}
+.stage-head{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px 12px}
+.stage-head h2{font:700 1.35rem/1.2 var(--font-display);margin:0}
+.src{font:400 0.8rem var(--font-mono);color:var(--ink-soft)}
+.plot{display:block;width:100%;height:auto;max-width:100%}
+.duo{display:grid;grid-template-columns:minmax(0,0.85fr) minmax(0,2fr);gap:12px;align-items:end}
+@media (max-width:560px){.duo{grid-template-columns:minmax(0,1fr)}.duo .wheel{width:min(100%,240px);margin-inline:auto}}
+
+/* SVG */
+.plot text{font-family:var(--font-mono);font-size:13px;fill:var(--ink-soft)}
+.plot .lbl-acc{fill:var(--accent);font-weight:600}
+.plot .lbl-red{fill:var(--red);font-family:var(--font-hand);font-size:17px}
+.plot .halo{paint-order:stroke;stroke:var(--panel);stroke-width:4px;stroke-linejoin:round}
+.g-minor{stroke:var(--plot-grid);stroke-width:1}
+.g-major{stroke:var(--plot-grid-major);stroke-width:1}
+.frame{fill:none;stroke:var(--plot-grid-major);stroke-width:1}
+.axis{stroke:var(--ink-soft);stroke-width:1.2}
+.ground{stroke:var(--ink);stroke-width:2}
+.curve{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.resid{stroke:var(--red);stroke-width:1.6;stroke-dasharray:3 3}
+.dot{fill:var(--ink);stroke:var(--panel);stroke-width:1.5}
+.struct{fill:none;stroke:var(--ink-soft);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.person-head{fill:none;stroke:var(--ink-soft);stroke-width:2}
+.rim{stroke:var(--red);stroke-width:4;stroke-linecap:round}
+.net{fill:none;stroke:var(--ink-soft);stroke-width:1;opacity:.75}
+.board{fill:var(--panel);stroke:var(--ink-soft);stroke-width:2}
+.mark{fill:var(--panel);stroke:var(--accent);stroke-width:2.5}
+.mark-r{fill:var(--red);stroke:var(--panel);stroke-width:1.5}
+.thresh{stroke:var(--red);stroke-width:1.6;stroke-dasharray:6 5}
+.band{fill:var(--red-soft)}
+.guide{stroke:var(--ink-soft);stroke-width:1;stroke-dasharray:3 4}
+.wheel-rim{fill:none;stroke:var(--ink-soft);stroke-width:2.5}
+.wheel-rim.thin{stroke-width:1;opacity:.6}
+.spoke{stroke:var(--ink-soft);stroke-width:1;opacity:.6}
+.hub{fill:var(--ink)}
+.cabin{fill:var(--panel);stroke:var(--ink-soft);stroke-width:1.4}
+.cabin-me{fill:var(--accent);stroke:var(--accent);stroke-width:1.4}
+.sheet{fill:var(--panel);stroke:var(--ink);stroke-width:1.5}
+.cut{stroke:var(--red);stroke-width:1.2}
+.hatch-line{stroke:var(--red);stroke-width:1.4}
+.fold{fill:none;stroke:var(--accent);stroke-width:1.4;stroke-dasharray:5 4}
+.arrow{fill:none;stroke:var(--red);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.face-r,.face-l,.face-in,.face-in2{stroke:var(--ink);stroke-width:1.2;stroke-linejoin:round}
+.face-r{fill:var(--box-r)}
+.face-l{fill:var(--box-l)}
+.face-in{fill:var(--box-in)}
+.face-in2{fill:var(--box-in2)}
+.tangent{stroke:var(--red);stroke-width:2.4;stroke-linecap:round}
+
+/* Điều khiển */
+.legend{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 18px;font-size:0.82rem;color:var(--ink-soft)}
+.legend li{display:flex;align-items:center;gap:7px}
+.sw{display:inline-block;width:18px;height:10px;flex:none}
+.sw-dot{width:10px;height:10px;border-radius:50%;background:var(--ink)}
+.sw-line{height:3px;background:var(--accent);border-radius:2px}
+.sw-resid{height:0;border-top:2px dashed var(--red)}
+.sw-band{background:var(--red-soft);border:1px solid var(--red)}
+.sw-tan{height:3px;background:var(--red);border-radius:2px}
+.sw-cut{background:repeating-linear-gradient(45deg,var(--red) 0 1.5px,transparent 1.5px 5px);border:1px solid var(--red)}
+.controls{display:grid;gap:10px}
+.ctl-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.sl{display:grid;grid-template-columns:8rem minmax(0,1fr) 5.6rem;gap:10px;align-items:center}
+.sl label{font-size:0.9rem;color:var(--ink-soft);white-space:nowrap}
+.sl label var,.math var{font-family:var(--font-math);font-style:italic;font-size:1.15rem;color:var(--ink)}
+.sl output{font:600 0.88rem var(--font-mono);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sl.is-off{opacity:.4}
+@media (max-width:480px){
+  .sl{grid-template-columns:minmax(0,1fr) auto;row-gap:2px}
+  .sl input{grid-column:1 / -1;grid-row:2}
+}
+input[type=range]{width:100%;accent-color:var(--accent);margin:0;cursor:pointer}
+input[type=range]:disabled{cursor:default}
+.seg{display:inline-flex;flex-wrap:wrap;padding:3px;border:1.5px solid var(--line);border-radius:9px;gap:2px;background:var(--panel)}
+.seg button{font:500 0.85rem var(--font-body);padding:6px 12px;border:0;border-radius:6px;background:transparent;color:var(--ink-soft);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1.5px var(--accent)}
+.btn{font:600 0.88rem/1.3 var(--font-body);padding:8px 14px;border-radius:8px;border:1.5px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.35;cursor:default}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px}
+.chk{display:inline-flex;align-items:center;gap:8px;font-size:0.9rem;color:var(--ink-soft);cursor:pointer}
+.chk input{accent-color:var(--accent);width:16px;height:16px;margin:0}
+.readout{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--paper)}
+.eq{font:1.15rem var(--font-math);color:var(--ink);overflow-wrap:anywhere}
+.pill{display:inline-flex;align-items:center;font:600 0.8rem/1.4 var(--font-mono);padding:4px 10px;border-radius:999px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--red-soft);color:var(--red)}
+.pill.info{background:var(--accent-soft);color:var(--ink)}
+
+/* Chu trình 4 bước */
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.steps button{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:8px 9px;border:1.5px solid var(--line);border-radius:8px;background:transparent;color:var(--ink-soft);font:500 0.78rem/1.25 var(--font-body);text-align:left;cursor:pointer}
+.steps .n{font:600 1.05rem var(--font-mono);color:inherit}
+.steps button[aria-current="step"]{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
+.steps button[aria-current="step"] .n{color:var(--accent)}
+.cycle-cap{font:400 1.05rem/1.3 var(--font-hand);color:var(--ink-soft);margin:0}
+.step{display:grid;gap:12px}
+.step h3{font:600 1.22rem/1.3 var(--font-display);margin:0}
+.step p{margin:0;max-width:62ch}
+.stack{display:grid;gap:10px}
+.math{font-family:var(--font-math);font-size:1.08em;white-space:nowrap}
+.eqline{font-family:var(--font-math);font-size:1.18rem;padding:4px 0;overflow-x:auto;white-space:nowrap}
+.q{border:1.5px dashed var(--accent);border-radius:10px;padding:10px 14px;display:grid;gap:2px}
+.q-lbl{font:600 0.72rem/1.4 var(--font-mono);text-transform:uppercase;letter-spacing:0.08em;color:var(--accent)}
+.q p{font-weight:600}
+.note{font:400 1.14rem/1.35 var(--font-hand);color:var(--red)}
+.note b{font-weight:400;text-decoration:underline;text-decoration-thickness:1.5px;text-underline-offset:3px}
+.res{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;margin:0;padding:10px 0;border-block:1px solid var(--line)}
+.res dt{color:var(--ink-soft);font-size:0.9rem}
+.res dd{margin:0;font:600 0.92rem var(--font-mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.verdict{padding:10px 12px;border-radius:8px;font-weight:600;font-size:0.95rem}
+.verdict.good{background:var(--good-soft);color:var(--good)}
+.verdict.warn{background:var(--warn-soft);color:var(--warn)}
+.verdict.bad{background:var(--red-soft);color:var(--red)}
+.verdict.info{background:var(--accent-soft);color:var(--ink);font-weight:500}
+.hint{font-size:0.88rem;color:var(--ink-soft);margin:0}
+.mini{width:100%;border-collapse:collapse;font-size:0.9rem}
+.mini th,.mini td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.mini th{font-weight:600;color:var(--ink-soft);font-size:0.82rem}
+.mini .num{text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.mini-wrap{overflow-x:auto}
+details{border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+summary{cursor:pointer;font-weight:600;color:var(--accent)}
+details[open] summary{margin-bottom:10px}
+textarea{width:100%;font:0.88rem/1.5 var(--font-mono);padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);resize:vertical}
+.err{color:var(--red);font-size:0.88rem}
+.field{display:grid;gap:6px;font-size:0.9rem;color:var(--ink-soft)}
+.field input{font:0.95rem var(--font-mono);padding:7px 10px;width:min(100%,12rem);border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink)}
+.exp{border-top:1px dashed var(--line);padding-top:12px}
+code{font-family:var(--font-mono);font-size:0.9em;background:var(--accent-soft);padding:1px 5px;border-radius:4px}
+.step-nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px;margin-top:2px}
+/* Thẻ "Đề của em" */
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{font:500 0.82rem var(--font-body);padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.status{margin:0;padding:8px 12px;border-radius:8px;font-size:0.9rem}
+.status:empty{display:none}
+.status.info{background:var(--accent-soft);color:var(--ink)}
+.status.good{background:var(--good-soft);color:var(--good)}
+.status.warn{background:var(--warn-soft);color:var(--warn)}
+.status.bad{background:var(--red-soft);color:var(--red)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.img-chip{display:inline-flex;gap:10px;align-items:center;font-size:0.85rem;color:var(--ink-soft)}
+.linkish{border:0;background:none;color:var(--red);font:600 0.85rem var(--font-body);cursor:pointer;padding:0;text-decoration:underline}
+.sl.sl-g{grid-template-columns:minmax(6rem,13rem) minmax(0,1fr) 7rem}
+.sl-g label{white-space:normal;line-height:1.3;font-size:0.85rem}
+@media (max-width:480px){.sl.sl-g{grid-template-columns:minmax(0,1fr) auto}}
+.plain-list{margin:0;padding-left:1.25em;display:grid;gap:4px}
+.stack > .pill{justify-self:start}
+.sw-dot2{width:11px;height:11px;border-radius:50%;background:var(--panel);border:2.5px solid var(--accent)}
+.sw-probe{width:10px;height:10px;border-radius:50%;background:var(--red)}
+h4.sub{font:600 0.95rem/1.4 var(--font-body);margin:4px 0 0;color:var(--ink-soft)}
+#g-live .res dd{white-space:normal}
+#g-input{min-height:7rem}
+.keybox summary .pill{margin-left:8px;vertical-align:middle}
+.keyrow{display:flex;gap:8px}
+.keyrow input,.textin,.field select{font:0.92rem var(--font-mono);padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);min-width:0}
+.keyrow input{flex:1}
+.field select{font-family:var(--font-body);width:min(100%,22rem)}
+.textin{width:min(100%,22rem)}
+footer{padding-block:6px 36px;color:var(--ink-soft);font-size:0.85rem}
+footer p{max-width:72ch;margin:0}
+@media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">Mẫu thử đề tài · Toán 10–12 · Sách Kết nối tri thức</p>
+    <h1>Xưởng Mô Hình Toán</h1>
+    <p class="lede">Mỗi bài đi đủ bốn bước của chu trình mô hình hóa: hiểu tình huống thực tế, lập mô hình, giải toán, rồi đối chiếu kết quả với số đo thật. Kéo các thanh trượt để thấy mô hình thay đổi. Ở thẻ “Đề của em”, dán một đề bất kì để Gemini dựng mô hình tương tự.</p>
+    <nav class="tabs" aria-label="Chọn bài">
+      <a class="tab" href="#nem-bong" data-key="nem-bong"><span class="grade">Lớp 10</span><span class="tname">Ném bóng vào rổ</span><span class="chap">Chương VI · Hàm số bậc hai</span></a>
+      <a class="tab" href="#du-quay" data-key="du-quay"><span class="grade">Lớp 11</span><span class="tname">Vòng đu quay</span><span class="chap">Chương I · Hàm số lượng giác</span></a>
+      <a class="tab" href="#hop-giay" data-key="hop-giay"><span class="grade">Lớp 12</span><span class="tname">Hộp giấy không nắp</span><span class="chap">Chương I · Ứng dụng đạo hàm</span></a>
+      <a class="tab tool" href="#de-moi" data-key="de-moi"><span class="grade">Tự dựng</span><span class="tname">Đề của em</span><span class="chap">Dán đề hoặc ảnh, Gemini dựng mô hình</span></a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- ============ BÀI 1: NÉM BÓNG ============ -->
+<section class="problem" data-key="nem-bong" aria-label="Ném bóng vào rổ">
+  <div class="stage">
+    <div class="stage-head"><h2>Ném bóng vào rổ</h2><span class="src" id="b-src">Dữ liệu mẫu</span></div>
+    <svg id="b-plot" class="plot" viewBox="0 0 546 462" role="img" aria-label="Quỹ đạo quả bóng: các điểm đo và đường mô hình"></svg>
+    <ul class="legend">
+      <li><span class="sw sw-dot"></span>Vị trí bóng đo từ video</li>
+      <li><span class="sw sw-line"></span>Mô hình</li>
+      <li><span class="sw sw-resid"></span>Độ lệch</li>
+    </ul>
+    <div class="controls">
+      <div class="ctl-row">
+        <div class="seg" role="group" aria-label="Dạng mô hình">
+          <button type="button" id="b-deg2">Bậc hai</button>
+          <button type="button" id="b-deg1">Bậc nhất</button>
+        </div>
+        <div class="btns">
+          <button type="button" class="btn primary" id="b-fit">Khớp tự động</button>
+          <button type="button" class="btn" id="b-reset">Đặt lại</button>
+        </div>
+      </div>
+      <div class="sl" id="b-row-a"><label for="b-a">Hệ số <var>a</var></label><input type="range" id="b-a" min="-1" max="0.5" step="0.005"><output id="b-a-v" for="b-a"></output></div>
+      <div class="sl"><label for="b-b">Hệ số <var>b</var></label><input type="range" id="b-b" min="-1" max="3" step="0.01"><output id="b-b-v" for="b-b"></output></div>
+      <div class="sl"><label for="b-c">Hệ số <var>c</var></label><input type="range" id="b-c" min="0" max="4" step="0.01"><output id="b-c-v" for="b-c"></output></div>
+      <div class="readout"><span class="eq" id="b-eq"></span><span class="pill" id="b-rmse"></span></div>
+    </div>
+  </div>
+
+  <aside class="cycle" aria-label="Chu trình mô hình hóa">
+    <ol class="steps">
+      <li><button type="button" data-step="1"><span class="n">1</span>Tình huống</button></li>
+      <li><button type="button" data-step="2"><span class="n">2</span>Lập mô hình</button></li>
+      <li><button type="button" data-step="3"><span class="n">3</span>Giải toán</button></li>
+      <li><button type="button" data-step="4"><span class="n">4</span>Đối chiếu</button></li>
+    </ol>
+    <p class="cycle-cap">Bốn bước nối thành vòng: đối chiếu xong lại quay về chỉnh mô hình.</p>
+
+    <div class="step" data-step="1">
+      <h3>Tình huống thực tế</h3>
+      <p>Một bạn đứng ở vạch ném phạt và ném bóng về phía rổ. Quay video bằng điện thoại, đánh dấu vị trí quả bóng qua từng khung hình, ta được các chấm đen trên hình.</p>
+      <p>Vành rổ cao <b>3,05 m</b>. Tâm rổ cách chỗ đứng ném <b>4,2 m</b> theo phương ngang.</p>
+      <div class="q"><span class="q-lbl">Câu hỏi</span><p>Quả bóng lên cao nhất bao nhiêu mét? Với đường bay này, bóng có vào rổ không?</p></div>
+    </div>
+
+    <div class="step" data-step="2" hidden>
+      <h3>Lập mô hình toán học</h3>
+      <p>Chọn hệ trục <span class="math">O<var>xy</var></span>: gốc <span class="math">O</span> dưới chân người ném, trục <span class="math">O<var>x</var></span> nằm ngang hướng về rổ, trục <span class="math">O<var>y</var></span> thẳng đứng, đơn vị mét.</p>
+      <p>Mô tả đường bay bằng một hàm số. Chọn dạng hàm ở nút <b>Bậc hai / Bậc nhất</b>, rồi kéo các hệ số để đường cong đi qua các chấm. Đoạn đứt màu đỏ là độ lệch giữa mô hình và số đo.</p>
+      <p class="eqline" id="b-eq2"></p>
+      <p class="note"><b>Giả thiết:</b> bỏ qua sức cản của không khí và độ xoáy của quả bóng.</p>
+    </div>
+
+    <div class="step" data-step="3" hidden>
+      <h3>Giải bài toán</h3>
+      <div id="b-solve" class="stack"></div>
+    </div>
+
+    <div class="step" data-step="4" hidden>
+      <h3>Đối chiếu với thực tế</h3>
+      <p>Mô hình em đang chọn lệch so với số đo trung bình <span class="pill" id="b-rmse2"></span></p>
+      <div class="mini-wrap">
+        <table class="mini">
+          <thead><tr><th scope="col">Dạng mô hình khớp tốt nhất</th><th scope="col" class="num">Độ lệch TB</th></tr></thead>
+          <tbody>
+            <tr><td>Bậc nhất <span class="math"><var>y</var> = <var>bx</var> + <var>c</var></span></td><td class="num" id="b-r1"></td></tr>
+            <tr><td>Bậc hai <span class="math"><var>y</var> = <var>ax</var>² + <var>bx</var> + <var>c</var></span></td><td class="num" id="b-r2"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p id="b-compare"></p>
+      <p class="note"><b>Giới hạn:</b> ném xa và mạnh hơn thì sức cản không khí làm đường bay lệch khỏi parabol, khi đó cần mô hình phức tạp hơn.</p>
+      <details>
+        <summary>Thử với số đo của em</summary>
+        <div class="stack">
+          <p class="hint">Mỗi dòng một điểm, dạng <code>x; y</code> tính bằng mét (x từ 0 đến 5). Dấu phẩy là dấu thập phân.</p>
+          <textarea id="b-data" rows="9" spellcheck="false" aria-label="Số đo vị trí quả bóng"></textarea>
+          <p class="err" id="b-err" hidden></p>
+          <div class="btns">
+            <button type="button" class="btn primary" id="b-use">Vẽ với số đo này</button>
+            <button type="button" class="btn" id="b-sample">Dùng lại dữ liệu mẫu</button>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <div class="step-nav"><button type="button" class="btn prev">← Bước trước</button><button type="button" class="btn primary next">Bước tiếp →</button></div>
+  </aside>
+</section>
+
+<!-- ============ BÀI 2: VÒNG ĐU QUAY ============ -->
+<section class="problem" data-key="du-quay" aria-label="Vòng đu quay" hidden>
+  <div class="stage">
+    <div class="stage-head"><h2>Vòng đu quay</h2><span class="src">Dữ liệu mẫu · áp kế điện thoại</span></div>
+    <div class="duo">
+      <svg id="w-wheel" class="plot wheel" viewBox="0 0 250 300" role="img" aria-label="Vòng đu quay và cabin của em"></svg>
+      <svg id="w-graph" class="plot" viewBox="0 0 520 300" role="img" aria-label="Đồ thị độ cao cabin theo thời gian"></svg>
+    </div>
+    <ul class="legend">
+      <li><span class="sw sw-dot"></span>Độ cao đo bằng áp kế</li>
+      <li><span class="sw sw-line"></span>Mô hình <i>h</i>(<i>t</i>)</li>
+      <li><span class="sw sw-band"></span>Lúc ở trên mốc h₀</li>
+    </ul>
+    <div class="controls">
+      <div class="ctl-row">
+        <button type="button" class="btn primary" id="w-play" aria-pressed="false">▶ Cho vòng quay chạy</button>
+        <label class="chk"><input type="checkbox" id="w-showdata" checked> Hiện số đo áp kế</label>
+      </div>
+      <div class="sl"><label for="w-t">Thời điểm <var>t</var></label><input type="range" id="w-t" min="0" max="12" step="0.05"><output id="w-t-v" for="w-t"></output></div>
+      <div class="sl"><label for="w-R">Bán kính <var>R</var></label><input type="range" id="w-R" min="10" max="38" step="1"><output id="w-R-v" for="w-R"></output></div>
+      <div class="sl"><label for="w-H">Độ cao tâm <var>H</var></label><input type="range" id="w-H" min="12" max="50" step="1"><output id="w-H-v" for="w-H"></output></div>
+      <div class="sl"><label for="w-T">Chu kì <var>T</var></label><input type="range" id="w-T" min="8" max="20" step="0.1"><output id="w-T-v" for="w-T"></output></div>
+      <div class="sl"><label for="w-h0">Mốc độ cao <var>h</var>₀</label><input type="range" id="w-h0" min="0" max="88" step="1"><output id="w-h0-v" for="w-h0"></output></div>
+      <div class="readout"><span class="eq" id="w-eq"></span><span class="pill info" id="w-now"></span></div>
+    </div>
+  </div>
+
+  <aside class="cycle" aria-label="Chu trình mô hình hóa">
+    <ol class="steps">
+      <li><button type="button" data-step="1"><span class="n">1</span>Tình huống</button></li>
+      <li><button type="button" data-step="2"><span class="n">2</span>Lập mô hình</button></li>
+      <li><button type="button" data-step="3"><span class="n">3</span>Giải toán</button></li>
+      <li><button type="button" data-step="4"><span class="n">4</span>Đối chiếu</button></li>
+    </ol>
+    <p class="cycle-cap">Bốn bước nối thành vòng: đối chiếu xong lại quay về chỉnh mô hình.</p>
+
+    <div class="step" data-step="1">
+      <h3>Tình huống thực tế</h3>
+      <p>Một vòng đu quay có đường kính <b>60 m</b>, tâm vòng quay cao <b>35 m</b> so với mặt đất. Bảng thông tin ghi: quay một vòng hết <b>12 phút</b>. Em lên cabin ở điểm thấp nhất, rồi vòng quay bắt đầu chạy.</p>
+      <div class="q"><span class="q-lbl">Câu hỏi</span><p>Trong một vòng quay, em ở độ cao trên 50 m trong bao nhiêu phút?</p></div>
+      <p>Trong lúc đi, em bật ứng dụng đo áp suất trên điện thoại để ghi lại độ cao. Đó là các chấm đen trên đồ thị.</p>
+    </div>
+
+    <div class="step" data-step="2" hidden>
+      <h3>Lập mô hình toán học</h3>
+      <p>Gọi <var>t</var> (phút) là thời gian kể từ lúc vòng quay chạy, <span class="math"><var>h</var>(<var>t</var>)</span> (m) là độ cao của cabin. Sau <var>t</var> phút, cabin quay được góc <span class="math">φ = 2π<var>t</var>/<var>T</var></span> tính từ điểm thấp nhất.</p>
+      <p>Chiếu vị trí cabin lên phương thẳng đứng, ta được</p>
+      <p class="eqline"><var>h</var>(<var>t</var>) = <var>H</var> − <var>R</var>·cos(2π<var>t</var>/<var>T</var>)</p>
+      <p>Với số liệu hiện tại:</p>
+      <p class="eqline" id="w-eq2"></p>
+      <p class="note"><b>Giả thiết:</b> vòng quay quay đều, không dừng giữa chừng; coi cabin như một điểm trên vành.</p>
+    </div>
+
+    <div class="step" data-step="3" hidden>
+      <h3>Giải bài toán</h3>
+      <div id="w-solve" class="stack"></div>
+    </div>
+
+    <div class="step" data-step="4" hidden>
+      <h3>Đối chiếu với thực tế</h3>
+      <p>Độ lệch trung bình giữa mô hình và số đo áp kế: <span class="pill" id="w-rmse"></span></p>
+      <p id="w-compare"></p>
+      <div class="btns"><button type="button" class="btn" id="w-best">Tìm chu kì T khớp nhất</button></div>
+      <p class="note"><b>Giới hạn:</b> áp kế điện thoại cũng có sai số và chịu ảnh hưởng của gió, thời tiết. Vòng quay thật có thể chạy chậm lại khi đón khách.</p>
+    </div>
+
+    <div class="step-nav"><button type="button" class="btn prev">← Bước trước</button><button type="button" class="btn primary next">Bước tiếp →</button></div>
+  </aside>
+</section>
+
+<!-- ============ BÀI 3: HỘP GIẤY ============ -->
+<section class="problem" data-key="hop-giay" aria-label="Hộp giấy không nắp" hidden>
+  <div class="stage">
+    <div class="stage-head">
+      <h2>Hộp giấy không nắp</h2>
+      <div class="seg" id="h-presets" role="group" aria-label="Chọn tờ giấy">
+        <button type="button" data-k="a4">A4</button>
+        <button type="button" data-k="sq">Vuông 20 cm</button>
+        <button type="button" data-k="bia">Bìa 30 × 40</button>
+      </div>
+    </div>
+    <svg id="h-net" class="plot" viewBox="0 0 520 290" role="img" aria-label="Tờ giấy cắt bốn góc và chiếc hộp sau khi gấp"></svg>
+    <svg id="h-graph" class="plot" viewBox="0 0 520 250" role="img" aria-label="Đồ thị thể tích hộp theo cạnh cắt x"></svg>
+    <ul class="legend">
+      <li><span class="sw sw-line"></span>Thể tích <i>V</i>(<i>x</i>)</li>
+      <li><span class="sw sw-tan"></span>Tiếp tuyến tại <i>x</i> đang chọn</li>
+      <li><span class="sw sw-cut"></span>Phần cắt bỏ</li>
+    </ul>
+    <div class="controls">
+      <div class="sl"><label for="h-x">Cạnh cắt <var>x</var></label><input type="range" id="h-x" min="0.1" max="10.4" step="0.05"><output id="h-x-v" for="h-x"></output></div>
+      <div class="readout"><span class="eq" id="h-eq"></span><span class="pill info" id="h-vol"></span></div>
+    </div>
+  </div>
+
+  <aside class="cycle" aria-label="Chu trình mô hình hóa">
+    <ol class="steps">
+      <li><button type="button" data-step="1"><span class="n">1</span>Tình huống</button></li>
+      <li><button type="button" data-step="2"><span class="n">2</span>Lập mô hình</button></li>
+      <li><button type="button" data-step="3"><span class="n">3</span>Giải toán</button></li>
+      <li><button type="button" data-step="4"><span class="n">4</span>Đối chiếu</button></li>
+    </ol>
+    <p class="cycle-cap">Bốn bước nối thành vòng: đối chiếu xong lại quay về chỉnh mô hình.</p>
+
+    <div class="step" data-step="1">
+      <h3>Tình huống thực tế</h3>
+      <p>Từ một <span class="h-name"></span>, cắt bỏ bốn hình vuông bằng nhau ở bốn góc rồi gấp các mép lên thành một chiếc hộp không nắp.</p>
+      <div class="q"><span class="q-lbl">Câu hỏi</span><p>Cần cắt hình vuông cạnh bao nhiêu để hộp đựng được nhiều nhất?</p></div>
+      <p>Đổi tờ giấy bằng các nút cạnh tiêu đề để thấy đáp số thay đổi theo kích thước.</p>
+    </div>
+
+    <div class="step" data-step="2" hidden>
+      <h3>Lập mô hình toán học</h3>
+      <p>Gọi <var>x</var> (cm) là cạnh hình vuông bị cắt, điều kiện <span class="math" id="h-dom"></span>.</p>
+      <p>Đáy hộp là hình chữ nhật <span class="math" id="h-base"></span>, chiều cao bằng <var>x</var>. Thể tích hộp:</p>
+      <p class="eqline" id="h-eq2"></p>
+      <p class="eqline" id="h-expand"></p>
+      <p class="note"><b>Giả thiết:</b> giấy không có độ dày, gấp vuông góc hoàn hảo và không cần mép dán.</p>
+    </div>
+
+    <div class="step" data-step="3" hidden>
+      <h3>Giải bài toán</h3>
+      <div id="h-solve" class="stack"></div>
+    </div>
+
+    <div class="step" data-step="4" hidden>
+      <h3>Đối chiếu với thực tế</h3>
+      <div id="h-compare" class="stack"></div>
+      <div class="exp stack">
+        <p><b>Thí nghiệm:</b> gấp hộp thật với cạnh cắt <var>x</var> em đang chọn, đổ đầy gạo rồi đong bằng ca có vạch chia (1 ml = 1 cm³).</p>
+        <label class="field" for="h-meas">Thể tích em đong được (cm³)
+          <input id="h-meas" type="text" inputmode="decimal" autocomplete="off" placeholder="ví dụ 1050">
+        </label>
+        <p id="h-meas-out" class="hint"></p>
+      </div>
+      <p class="note"><b>Giới hạn:</b> hộp thật cần mép dán, giấy có độ dày và nếp gấp không vuông tuyệt đối, nên thể tích đo được thường nhỏ hơn tính toán.</p>
+    </div>
+
+    <div class="step-nav"><button type="button" class="btn prev">← Bước trước</button><button type="button" class="btn primary next">Bước tiếp →</button></div>
+  </aside>
+</section>
+
+<!-- ============ ĐỀ CỦA EM: Gemini đọc đề, trang tự dựng ============ -->
+<section class="problem" data-key="de-moi" aria-label="Đề của em" hidden>
+  <div class="stage">
+    <div class="stage-head"><h2 id="g-title">Đề của em</h2><span class="src">Gemini đọc đề · trang tự vẽ</span></div>
+    <details class="keybox" id="g-settings">
+      <summary>Cài đặt Gemini<span class="pill" id="g-key-state"></span></summary>
+      <div class="stack">
+        <div id="g-key-fields" class="stack">
+          <p class="hint">Lấy khóa API tại <a href="https://aistudio.google.com/" target="_blank" rel="noopener">Google AI Studio</a> (mục “Get API key”). Khóa chỉ lưu trong trình duyệt này và được gửi thẳng tới Google.</p>
+          <label class="field" for="g-key">Khóa API Gemini</label>
+          <div class="keyrow"><input id="g-key" type="password" autocomplete="off" spellcheck="false" placeholder="Dán khóa API vào đây"><button type="button" class="btn" id="g-key-toggle">Hiện</button></div>
+          <label class="chk"><input type="checkbox" id="g-remember" checked> Nhớ khóa trên máy này</label>
+        </div>
+        <p class="hint" id="g-proxy-note" hidden>Trang đang dùng máy chủ trung gian của lớp, không cần nhập khóa.</p>
+        <label class="field" for="g-model">Mô hình Gemini
+          <select id="g-model">
+            <option value="gemini-3.8-flash">gemini-3.8-flash (mặc định)</option>
+            <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (nhanh, rẻ hơn)</option>
+            <option value="custom">Tên khác…</option>
+          </select>
+        </label>
+        <input id="g-model-custom" class="textin" type="text" autocomplete="off" spellcheck="false" placeholder="ví dụ gemini-3.6-flash" hidden aria-label="Tên mô hình Gemini khác">
+        <div class="btns"><button type="button" class="btn primary" id="g-save">Lưu cài đặt</button><button type="button" class="btn" id="g-forget">Xóa khóa</button></div>
+      </div>
+    </details>
+    <div class="stack">
+      <label class="field" for="g-input">Dán đề bài thực tế, hoặc chọn ảnh chụp đề</label>
+      <textarea id="g-input" rows="5" spellcheck="false" placeholder="Ví dụ: Một người gửi tiết kiệm 100 triệu đồng với lãi suất 6% một năm…"></textarea>
+      <div class="chips">
+        <span class="hint">Thử đề mẫu:</span>
+        <button type="button" class="chip" data-ex="0">Lãi kép</button>
+        <button type="button" class="chip" data-ex="1">Nồng độ thuốc</button>
+        <button type="button" class="chip" data-ex="2">Bể nước rẻ nhất</button>
+      </div>
+      <div class="ctl-row">
+        <div class="btns">
+          <button type="button" class="btn primary" id="g-run">Dựng mô hình</button>
+          <button type="button" class="btn" id="g-stop" hidden>Dừng</button>
+          <button type="button" class="btn" id="g-img-btn" hidden>Chọn ảnh đề</button>
+          <input type="file" id="g-img" class="sr-only" tabindex="-1" aria-hidden="true">
+        </div>
+        <span class="img-chip" id="g-img-row" hidden><span id="g-img-name"></span><button type="button" class="linkish" id="g-img-clear">Bỏ ảnh</button></span>
+      </div>
+      <p class="status" id="g-status" role="status" aria-live="polite"></p>
+    </div>
+    <svg id="g-plot" class="plot" viewBox="0 0 560 340" role="img" aria-label="Đồ thị mô hình dựng từ đề"></svg>
+    <ul class="legend">
+      <li><span class="sw sw-line"></span>Mô hình</li>
+      <li><span class="sw sw-dot2"></span>Kết quả bài toán</li>
+      <li><span class="sw sw-probe"></span>Giá trị đang xét</li>
+    </ul>
+    <div class="controls">
+      <div class="sl sl-g"><label for="g-probe" id="g-probe-l">Biến đang xét</label><input type="range" id="g-probe" step="any"><output id="g-probe-v" for="g-probe"></output></div>
+      <div id="g-params" class="controls"></div>
+      <div class="ctl-row"><span class="hint">Các thanh trên là số liệu của đề. Kéo để thử “nếu… thì…”.</span><button type="button" class="btn" id="g-reset">Trả về số liệu đề</button></div>
+      <div class="readout"><span class="eq" id="g-eq"></span><span class="pill info" id="g-now"></span></div>
+    </div>
+  </div>
+
+  <aside class="cycle" aria-label="Chu trình mô hình hóa">
+    <ol class="steps">
+      <li><button type="button" data-step="1"><span class="n">1</span>Tình huống</button></li>
+      <li><button type="button" data-step="2"><span class="n">2</span>Lập mô hình</button></li>
+      <li><button type="button" data-step="3"><span class="n">3</span>Giải toán</button></li>
+      <li><button type="button" data-step="4"><span class="n">4</span>Đối chiếu</button></li>
+    </ol>
+    <p class="cycle-cap">Gemini viết phần chữ; các con số ở bước 3 do trang tự tính lại theo thanh trượt.</p>
+    <div class="step" data-step="1"><h3>Tình huống thực tế</h3><div id="g-s1" class="stack"></div></div>
+    <div class="step" data-step="2" hidden><h3>Lập mô hình toán học</h3><div id="g-s2" class="stack"></div></div>
+    <div class="step" data-step="3" hidden>
+      <h3>Giải bài toán</h3>
+      <div id="g-s3" class="stack"></div>
+      <h4 class="sub">Tính lại trên mô hình đang hiển thị</h4>
+      <div id="g-live" class="stack"></div>
+    </div>
+    <div class="step" data-step="4" hidden>
+      <h3>Đối chiếu với thực tế</h3>
+      <div id="g-s4" class="stack"></div>
+      <p class="note"><b>Lưu ý:</b> mô hình do Gemini dựng từ đề nên có thể sai. Thầy cô và học sinh cần kiểm tra lại công thức trước khi dùng.</p>
+    </div>
+    <div class="step-nav"><button type="button" class="btn prev">← Bước trước</button><button type="button" class="btn primary next">Bước tiếp →</button></div>
+  </aside>
+</section>
+</main>
+
+<footer class="wrap">
+  <p><b>Mẫu thử cho đề tài nghiên cứu.</b> Mọi số đo trong trang (video ném bóng, áp kế điện thoại) là dữ liệu mẫu tạo ra để minh họa, không phải số đo thật. Nội dung bám theo sách Toán 10, 11, 12 bộ Kết nối tri thức với cuộc sống. Thẻ “Đề của em” gọi Gemini API bằng khóa của người dùng (hoặc qua máy chủ trung gian); mô hình Gemini dựng cần được kiểm tra lại.</p>
+</footer>
+
+<script>
+(() => {
+"use strict";
+
+/* ===================== CẤU HÌNH =====================
+   PROXY_URL: địa chỉ máy chủ trung gian (tệp worker.js) khi đăng trang cho cả lớp dùng chung,
+              ví dụ "https://xuong-mo-hinh.tenban.workers.dev". Khi có PROXY_URL, khóa API nằm ở máy chủ,
+              học sinh không cần (và không thấy) khóa.
+   Để trống "" thì mỗi người tự nhập khóa API Gemini của mình trong mục “Cài đặt Gemini”.
+   ĐỪNG dán khóa API thẳng vào mã trang: ai mở trang cũng đọc được. */
+const PROXY_URL = "";
+const DEFAULT_MODEL = "gemini-3.8-flash";
+const KEY_STORE = "xmht.gemini.key", MODEL_STORE = "xmht.gemini.model";
+
+/* ---------- Tiện ích chung ---------- */
+const nfc = {};
+const nf = (a, b) => nfc[a + "-" + b] || (nfc[a + "-" + b] = new Intl.NumberFormat("vi-VN", { minimumFractionDigits: a, maximumFractionDigits: b }));
+function fmt(v, d = 2) {
+  if (!Number.isFinite(v)) return "—";
+  if (Math.abs(v) < 0.5 * Math.pow(10, -d)) v = 0;
+  return nf(d, d).format(v).replace("-", "−");
+}
+function fmtS(v, d = 2) {
+  if (!Number.isFinite(v)) return "—";
+  if (Math.abs(v) < 1e-9) v = 0;
+  return nf(0, d).format(v).replace("-", "−");
+}
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const r1 = v => Math.round(v * 10) / 10;
+const fmtLen = r => (r < 1 ? fmt(r * 100, 1) + " cm" : fmt(r, 2) + " m");
+function rmse(pts, f) {
+  let s = 0;
+  for (const [x, y] of pts) { const e = y - f(x); s += e * e; }
+  return Math.sqrt(s / pts.length);
+}
+function polyfit(xs, ys, deg) {
+  const n = deg + 1;
+  if (xs.length < n) return null;
+  const A = Array.from({ length: n }, () => new Array(n + 1).fill(0));
+  for (let i = 0; i < xs.length; i++) {
+    const p = [];
+    for (let j = 0; j < n; j++) p.push(Math.pow(xs[i], j));
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) A[r][c] += p[r] * p[c];
+      A[r][n] += p[r] * ys[i];
+    }
+  }
+  for (let col = 0; col < n; col++) {
+    let piv = col;
+    for (let r = col + 1; r < n; r++) if (Math.abs(A[r][col]) > Math.abs(A[piv][col])) piv = r;
+    const tmp = A[col]; A[col] = A[piv]; A[piv] = tmp;
+    const pv = A[col][col];
+    if (Math.abs(pv) < 1e-12) return null;
+    for (let c = col; c <= n; c++) A[col][c] /= pv;
+    for (let r = 0; r < n; r++) {
+      if (r === col) continue;
+      const f = A[r][col];
+      for (let c = col; c <= n; c++) A[r][c] -= f * A[col][c];
+    }
+  }
+  return A.map(row => row[n]);
+}
+const evalPoly = c => x => c.reduce((s, k, i) => s + k * Math.pow(x, i), 0);
+function setPill(el, cls, text) { el.className = "pill " + cls; el.textContent = text; }
+function niceStep(raw) {
+  const e = Math.pow(10, Math.floor(Math.log10(raw)));
+  const f = raw / e;
+  return (f <= 1 ? 1 : f <= 2.5 ? 2 : f <= 5 ? 5 : 10) * e;
+}
+function parseData(txt) {
+  const pts = [];
+  for (const raw of txt.split(/\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    let parts = line.split(/[;\s\t]+/).filter(Boolean);
+    if (parts.length === 1 && parts[0].includes(".") && parts[0].split(",").length === 2) parts = parts[0].split(",");
+    if (parts.length !== 2) return { error: `Dòng “${line}” chưa đúng dạng “x; y”.` };
+    const x = Number(parts[0].replace(",", ".")), y = Number(parts[1].replace(",", "."));
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return { error: `Dòng “${line}” có số không đọc được.` };
+    pts.push([x, y]);
+  }
+  if (pts.length < 3) return { error: "Cần ít nhất 3 điểm để khớp được parabol." };
+  return { pts };
+}
+
+/* ---------- Bộ đọc công thức an toàn + bộ giải số (dùng cho "Đề của em") ---------- */
+const FN = { sin: Math.sin, cos: Math.cos, tan: Math.tan, asin: Math.asin, acos: Math.acos, atan: Math.atan, sqrt: Math.sqrt, abs: Math.abs, exp: Math.exp, ln: Math.log, log: Math.log10 };
+const CONST = { pi: Math.PI, e: Math.E };
+const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+function compileExpr(src, names) {
+  const s = String(src).replace(/\s+/g, "").replace(/[×·]/g, "*").replace(/−/g, "-").replace(/π/g, "pi").replace(/√/g, "sqrt");
+  let i = 0;
+  const fail = m => { throw new Error(m); };
+  const peek = () => s[i];
+  function parseExpr() {
+    let a = parseTerm();
+    for (;;) {
+      const c = peek();
+      if (c !== "+" && c !== "-") return a;
+      i++;
+      const l = a, r = parseTerm();
+      a = c === "+" ? env => l(env) + r(env) : env => l(env) - r(env);
+    }
+  }
+  function parseTerm() {
+    let a = parseUnary();
+    for (;;) {
+      const c = peek();
+      if (c !== "*" && c !== "/") return a;
+      i++;
+      const l = a, r = parseUnary();
+      a = c === "*" ? env => l(env) * r(env) : env => l(env) / r(env);
+    }
+  }
+  function parseUnary() {
+    const c = peek();
+    if (c === "-") { i++; const a = parseUnary(); return env => -a(env); }
+    if (c === "+") { i++; return parseUnary(); }
+    return parsePower();
+  }
+  function parsePower() {
+    const base = parsePrimary();
+    if (peek() === "^") { i++; const ex = parseUnary(); return env => Math.pow(base(env), ex(env)); }
+    return base;
+  }
+  function parsePrimary() {
+    const c = peek();
+    if (c === undefined) fail("Công thức bị thiếu một phần");
+    if (c === "(") { i++; const a = parseExpr(); if (peek() !== ")") fail("Công thức thiếu dấu ngoặc đóng"); i++; return a; }
+    const rest = s.slice(i);
+    const num = /^(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?/.exec(rest);
+    if (num) { i += num[0].length; const v = parseFloat(num[0]); return () => v; }
+    const id = /^[A-Za-z_][A-Za-z0-9_]*/.exec(rest);
+    if (id) {
+      const name = id[0];
+      i += name.length;
+      if (peek() === "(") {
+        if (!own(FN, name)) fail(`Công thức có hàm lạ “${name}”`);
+        const fn = FN[name];
+        i++;
+        const a = parseExpr();
+        if (peek() !== ")") fail("Công thức thiếu dấu ngoặc đóng");
+        i++;
+        return env => fn(a(env));
+      }
+      if (names.has(name)) return env => env[name];
+      if (own(CONST, name)) { const v = CONST[name]; return () => v; }
+      fail(`Công thức có kí hiệu lạ “${name}”`);
+    }
+    fail(`Công thức có kí tự lạ “${c}”`);
+  }
+  const f = parseExpr();
+  if (i < s.length) fail(`Công thức có phần thừa “${s.slice(i, i + 8)}”`);
+  return f;
+}
+function sampleFn(f, a, b, n) {
+  const xs = [], ys = [];
+  for (let k = 0; k <= n; k++) {
+    const x = a + (b - a) * k / n;
+    let y;
+    try { y = f(x); } catch (e) { y = NaN; }
+    xs.push(x);
+    ys.push(Number.isFinite(y) ? y : NaN);
+  }
+  return { xs, ys };
+}
+function extremum(f, a, b, wantMax) {
+  const { xs, ys } = sampleFn(f, a, b, 600);
+  let bi = -1;
+  for (let k = 0; k < ys.length; k++) {
+    if (!Number.isFinite(ys[k])) continue;
+    if (bi < 0 || (wantMax ? ys[k] > ys[bi] : ys[k] < ys[bi])) bi = k;
+  }
+  if (bi < 0) return null;
+  let lo = xs[Math.max(0, bi - 1)], hi = xs[Math.min(xs.length - 1, bi + 1)];
+  const g = x => { const y = f(x); return Number.isFinite(y) ? (wantMax ? -y : y) : Infinity; };
+  const R = (Math.sqrt(5) - 1) / 2;
+  let c = hi - R * (hi - lo), d = lo + R * (hi - lo);
+  for (let k = 0; k < 80; k++) {
+    if (g(c) < g(d)) hi = d; else lo = c;
+    c = hi - R * (hi - lo);
+    d = lo + R * (hi - lo);
+  }
+  let x = (lo + hi) / 2, y = f(x);
+  if (!Number.isFinite(y) || (wantMax ? ys[bi] > y : ys[bi] < y)) { x = xs[bi]; y = ys[bi]; }
+  const span = b - a;
+  return { x, y, edge: Math.abs(x - a) < span * 0.002 || Math.abs(x - b) < span * 0.002 };
+}
+function roots(g, a, b) {
+  const { xs, ys } = sampleFn(g, a, b, 800), out = [];
+  let scale = 0;
+  for (const y of ys) if (Number.isFinite(y)) scale = Math.max(scale, Math.abs(y));
+  const tol = 1e-3 * (1 + scale);
+  for (let k = 0; k < xs.length - 1; k++) {
+    const y0 = ys[k], y1 = ys[k + 1];
+    if (!Number.isFinite(y0) || !Number.isFinite(y1)) continue;
+    if (y0 === 0) { out.push(xs[k]); continue; }
+    if (y0 * y1 < 0) {
+      let lo = xs[k], hi = xs[k + 1], flo = y0;
+      for (let j = 0; j < 60; j++) {
+        const m = (lo + hi) / 2, fm = g(m);
+        if (!Number.isFinite(fm)) break;
+        if (flo * fm <= 0) hi = m; else { lo = m; flo = fm; }
+      }
+      const r = (lo + hi) / 2, gr = g(r);
+      if (Number.isFinite(gr) && Math.abs(gr) <= tol) out.push(r);
+    }
+  }
+  if (ys[ys.length - 1] === 0) out.push(xs[xs.length - 1]);
+  return out.filter((x, k, arr) => k === 0 || Math.abs(x - arr[k - 1]) > (b - a) * 1e-6);
+}
+function intervalsWhere(g, a, b, positive) {
+  const pts = [a, ...roots(g, a, b).filter(x => x > a && x < b), b], iv = [];
+  for (let k = 0; k < pts.length - 1; k++) {
+    const v = g((pts[k] + pts[k + 1]) / 2);
+    if (Number.isFinite(v) && (positive ? v > 0 : v < 0)) {
+      if (iv.length && Math.abs(iv[iv.length - 1][1] - pts[k]) < 1e-12) iv[iv.length - 1][1] = pts[k + 1];
+      else iv.push([pts[k], pts[k + 1]]);
+    }
+  }
+  return iv;
+}
+function normalizeModel(raw) {
+  const str = v => (typeof v === "string" ? v.trim().slice(0, 700) : typeof v === "number" && Number.isFinite(v) ? String(v) : "");
+  const arr = v => (Array.isArray(v) ? v.map(str).filter(Boolean).slice(0, 6) : []);
+  const num = v => (typeof v === "number" ? v : typeof v === "string" && v.trim() !== "" ? Number(v.trim().replace(",", ".")) : NaN);
+  const ident = v => (typeof v === "string" && /^[A-Za-z_][A-Za-z0-9_]{0,11}$/.test(v) && !own(FN, v) && !own(CONST, v) && !(v in Object.prototype) ? v : null);
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Câu trả lời của Gemini không đúng khuôn");
+  if (raw.supported === false) return { unsupported: true, reason: str(raw.reason) || "Đề này chưa đưa được về một hàm số một biến." };
+  const vr = raw.variable && typeof raw.variable === "object" ? raw.variable : {};
+  const out = raw.output && typeof raw.output === "object" ? raw.output : {};
+  const vsym = ident(vr.symbol) || "x";
+  const used = new Set([vsym]), params = [];
+  for (const p of Array.isArray(raw.params) ? raw.params.slice(0, 5) : []) {
+    if (!p || typeof p !== "object") continue;
+    const sym = ident(p.symbol), value = num(p.value);
+    if (!sym || used.has(sym) || !Number.isFinite(value)) continue;
+    let mn = num(p.min), mx = num(p.max);
+    if (!Number.isFinite(mn) || !Number.isFinite(mx) || mn >= mx || value < mn || value > mx) {
+      if (value > 0) { mn = value / 4; mx = value * 2; }
+      else if (value < 0) { mn = value * 2; mx = value / 4; }
+      else { mn = -1; mx = 1; }
+    }
+    let step = num(p.step);
+    if (!(step > 0) || step > (mx - mn) / 4) step = niceStep((mx - mn) / 200);
+    used.add(sym);
+    params.push({ sym, name: str(p.name).slice(0, 80), unit: str(p.unit).slice(0, 16), value, init: value, min: mn, max: mx, step });
+  }
+  const exprText = str(raw.expr);
+  if (!exprText) throw new Error("Gemini chưa đưa ra công thức hàm số");
+  const f = compileExpr(exprText, used);
+  const bound = (v, dflt) => {
+    if (typeof v === "number" && Number.isFinite(v)) return () => v;
+    const s = str(v);
+    if (s) { const g = compileExpr(s, used); return env => g(env); }
+    return () => dflt;
+  };
+  const vmin = bound(vr.min, 0), vmax = bound(vr.max, 10);
+  const g = raw.goal && typeof raw.goal === "object" ? raw.goal : {};
+  const types = ["max", "min", "value_at", "solve", "above", "below", "none"];
+  return {
+    title: str(raw.title).slice(0, 80), chapter: str(raw.chapter).slice(0, 100),
+    situation: str(raw.situation), question: str(raw.question),
+    vsym, vname: str(vr.name).slice(0, 80), vunit: str(vr.unit).slice(0, 16),
+    osym: ident(out.symbol) || "y", oname: str(out.name), ounit: str(out.unit).slice(0, 16),
+    params, f, exprText, vmin, vmax,
+    goal: { type: types.includes(g.type) ? g.type : "none", target: num(g.target), at: num(g.at) },
+    modelSteps: arr(raw.modelSteps), assumptions: arr(raw.assumptions), solution: arr(raw.solution),
+    answer: str(raw.answer), reality: arr(raw.reality), experiment: str(raw.experiment)
+  };
+}
+/*TEST-END*/
+
+/* ---------- Bài 1: Ném bóng (hàm số bậc hai) ---------- */
+const B = (() => {
+  const svg = $("#b-plot");
+  const ML = 46, MT = 14, K = 90, X0 = -0.4, X1 = 5.0, Y1 = 4.6;
+  const PW = (X1 - X0) * K, PH = Y1 * K;
+  const sx = v => ML + (v - X0) * K, sy = v => MT + (Y1 - v) * K;
+  const HOOP = { x: 4.2, y: 3.05, r: 0.225 };
+  const truth = x => -0.347 * x * x + 1.6656 * x + 2.1013;
+  const NOISE = [0.02, -0.03, 0.01, 0.03, -0.02, 0, 0.025, -0.015, 0.01];
+  const SAMPLE = NOISE.map((n, i) => { const x = i * 0.5; return [x, Math.round((truth(x) + n) * 100) / 100]; });
+  const START = { a: -0.2, b: 1.0, c: 2.0 };
+  const st = { deg: 2, a: START.a, b: START.b, c: START.c, data: SAMPLE.slice(), custom: false };
+  const inA = $("#b-a"), inB = $("#b-b"), inC = $("#b-c"), ta = $("#b-data"), err = $("#b-err");
+  const f = x => (st.deg === 2 ? st.a * x * x : 0) + st.b * x + st.c;
+  const dataText = pts => pts.map(([x, y]) => fmtS(x, 2) + "; " + fmtS(y, 2)).join("\n");
+
+  function polyHTML() {
+    const terms = st.deg === 2
+      ? [[st.a, "<var>x</var>²", 3], [st.b, "<var>x</var>", 2], [st.c, "", 2]]
+      : [[st.b, "<var>x</var>", 2], [st.c, "", 2]];
+    let s = "<var>y</var> = ";
+    terms.forEach(([v, t, d], i) => {
+      const m = fmt(Math.abs(v), d);
+      s += i === 0 ? (v < 0 ? "−" : "") + m + t : (v < 0 ? " − " : " + ") + m + t;
+    });
+    return s;
+  }
+
+  function draw() {
+    const p = [];
+    p.push(`<defs><clipPath id="b-clip"><rect x="${ML}" y="${MT}" width="${PW}" height="${PH}"/></clipPath></defs>`);
+    for (let i = 0; i <= 10; i++) { const X = r1(sx(i * 0.5)); p.push(`<line class="${i % 2 ? "g-minor" : "g-major"}" x1="${X}" y1="${MT}" x2="${X}" y2="${MT + PH}"/>`); }
+    for (let j = 1; j <= 9; j++) { const Y = r1(sy(j * 0.5)); p.push(`<line class="${j % 2 ? "g-minor" : "g-major"}" x1="${ML}" y1="${Y}" x2="${ML + PW}" y2="${Y}"/>`); }
+    p.push(`<rect class="frame" x="${ML}" y="${MT}" width="${PW}" height="${PH}"/>`);
+    for (let x = 0; x <= 5; x++) p.push(`<text x="${r1(sx(x))}" y="${MT + PH + 21}" text-anchor="middle">${x === 5 ? "5 m" : x}</text>`);
+    for (let y = 1; y <= 4; y++) p.push(`<text x="${ML - 7}" y="${r1(sy(y) + 4)}" text-anchor="end">${y === 4 ? "4 m" : y}</text>`);
+    p.push(`<line class="axis" x1="${r1(sx(0))}" y1="${MT}" x2="${r1(sx(0))}" y2="${r1(sy(0))}"/>`);
+    p.push(`<line class="ground" x1="${ML}" y1="${r1(sy(0))}" x2="${ML + PW}" y2="${r1(sy(0))}"/>`);
+
+    /* Cột rổ */
+    const bx = HOOP.x + HOOP.r + 0.15;
+    p.push(`<path class="struct" d="M${r1(sx(4.95))} ${r1(sy(0))} V${r1(sy(3.45))} H${r1(sx(bx + 0.06))}"/>`);
+    p.push(`<rect class="board" x="${r1(sx(bx))}" y="${r1(sy(4.0))}" width="${r1(0.06 * K)}" height="${r1(1.05 * K)}"/>`);
+    const nl = HOOP.x - HOOP.r, nr = HOOP.x + HOOP.r, ny = HOOP.y - 0.42;
+    const P = (x, y) => r1(sx(x)) + " " + r1(sy(y));
+    p.push(`<path class="net" d="M${P(nl, HOOP.y)} L${P(HOOP.x - 0.13, ny)} M${P(nr, HOOP.y)} L${P(HOOP.x + 0.13, ny)} M${P(HOOP.x - 0.08, HOOP.y)} L${P(HOOP.x + 0.13, ny)} M${P(HOOP.x + 0.08, HOOP.y)} L${P(HOOP.x - 0.13, ny)} M${P(HOOP.x - 0.13, ny)} L${P(HOOP.x + 0.13, ny)}"/>`);
+    p.push(`<line class="struct" x1="${r1(sx(nr))}" y1="${r1(sy(HOOP.y))}" x2="${r1(sx(bx))}" y2="${r1(sy(HOOP.y))}"/>`);
+    p.push(`<line class="rim" x1="${r1(sx(nl))}" y1="${r1(sy(HOOP.y))}" x2="${r1(sx(nr))}" y2="${r1(sy(HOOP.y))}"/>`);
+    p.push(`<text class="lbl-red halo" x="${r1(sx(HOOP.x - 0.05))}" y="${r1(sy(ny) + 24)}" text-anchor="middle">vành rổ 3,05 m</text>`);
+
+    /* Người ném */
+    const px = -0.2;
+    p.push(`<circle class="person-head" cx="${r1(sx(px))}" cy="${r1(sy(1.62))}" r="9"/>`);
+    p.push(`<path class="struct" d="M${P(px, 1.52)} L${P(px, 0.85)} M${P(px, 0.85)} L${P(px - 0.14, 0)} M${P(px, 0.85)} L${P(px + 0.12, 0)} M${P(px, 1.38)} L${P(-0.02, 2.05)} M${P(px, 1.38)} L${P(px + 0.16, 1.1)}"/>`);
+
+    /* Mô hình, độ lệch, số đo */
+    let d = "";
+    for (let i = 0; i <= 208; i++) { const x = i * 0.025; const y = clamp(f(x), -3, 9); d += (i ? "L" : "M") + P(x, y); }
+    p.push(`<g clip-path="url(#b-clip)"><path class="curve" d="${d}"/>`);
+    for (const [x, y] of st.data) p.push(`<line class="resid" x1="${r1(sx(x))}" y1="${r1(sy(y))}" x2="${r1(sx(x))}" y2="${r1(sy(clamp(f(x), -3, 9)))}"/>`);
+    for (const [x, y] of st.data) p.push(`<circle class="dot" cx="${r1(sx(x))}" cy="${r1(sy(y))}" r="5"/>`);
+    const yr = f(HOOP.x);
+    if (yr > 0 && yr < Y1) p.push(`<circle class="mark-r" cx="${r1(sx(HOOP.x))}" cy="${r1(sy(yr))}" r="5.5"/>`);
+    if (st.deg === 2 && st.a < -1e-6) {
+      const xv = -st.b / (2 * st.a), yv = f(xv);
+      if (xv > X0 && xv < X1 && yv > 0 && yv < Y1) {
+        p.push(`<circle class="mark" cx="${r1(sx(xv))}" cy="${r1(sy(yv))}" r="6"/>`);
+        p.push(`<text class="lbl-acc halo" x="${r1(clamp(sx(xv), ML + 70, ML + PW - 70))}" y="${r1(Math.max(MT + 16, sy(yv) - 13))}" text-anchor="middle">đỉnh (${fmt(xv, 2)}; ${fmt(yv, 2)})</text>`);
+      }
+    }
+    p.push(`</g>`);
+    svg.innerHTML = p.join("");
+  }
+
+  function solve() {
+    const out = $("#b-solve");
+    let h;
+    if (st.deg === 1) {
+      h = `<p>Đồ thị hàm bậc nhất là một đường thẳng nên <b>không có điểm cao nhất</b>. Theo mô hình này, quả bóng cứ bay ${st.b > 0 ? "lên" : "xuống"} mãi.</p><div class="verdict bad">Mô hình bậc nhất không trả lời được câu hỏi. Quay lại bước 2 và đổi sang dạng bậc hai.</div>`;
+    } else if (st.a >= 0) {
+      h = `<p>Với <span class="math"><var>a</var> ≥ 0</span>, parabol có bề lõm hướng lên trên nên không có điểm cao nhất.</p><div class="verdict bad">Kéo hệ số <var>a</var> về giá trị âm để parabol có đỉnh.</div>`;
+    } else {
+      const xv = -st.b / (2 * st.a), yv = f(xv), yr = f(HOOP.x), dd = yr - HOOP.y;
+      let v, cls;
+      if (xv >= HOOP.x) { v = "Tới chỗ rổ mà quả bóng vẫn đang bay lên, nên không thể rơi vào rổ."; cls = "bad"; }
+      else if (dd > 0.15) { v = "Bóng bay cao hơn vành rổ: đập bảng hoặc bay qua rổ."; cls = "warn"; }
+      else if (dd >= 0) { v = "Bóng đi qua vành rổ khi đang rơi xuống: vào rổ!"; cls = "good"; }
+      else if (dd >= -0.12) { v = "Bóng tới thấp hơn vành rổ một chút: dễ chạm vành rồi bật ra."; cls = "warn"; }
+      else { v = "Bóng rơi thấp hẳn so với vành rổ: ném trượt."; cls = "bad"; }
+      h = `<dl class="res">
+        <dt>Hoành độ đỉnh <span class="math"><var>x</var> = −<var>b</var>/(2<var>a</var>)</span></dt><dd>${fmt(xv, 2)} m</dd>
+        <dt>Độ cao lớn nhất của bóng</dt><dd>${fmt(yv, 2)} m</dd>
+        <dt>Độ cao khi tới rổ, <span class="math"><var>y</var>(4,2)</span></dt><dd>${fmt(yr, 2)} m</dd>
+        <dt>So với vành rổ 3,05 m</dt><dd>${dd >= 0 ? "+" : "−"}${fmtLen(Math.abs(dd))}</dd>
+      </dl><div class="verdict ${cls}">${v}</div>`;
+      if (rmse(st.data, f) >= 0.06) h += `<p class="hint">Mô hình còn lệch nhiều so với số đo nên kết luận chưa đáng tin. Bấm “Khớp tự động” hoặc chỉnh lại các hệ số.</p>`;
+    }
+    out.innerHTML = h;
+  }
+
+  function compare() {
+    const xs = st.data.map(q => q[0]), ys = st.data.map(q => q[1]);
+    const c1 = polyfit(xs, ys, 1), c2 = polyfit(xs, ys, 2);
+    const e1 = c1 ? rmse(st.data, evalPoly(c1)) : NaN, e2 = c2 ? rmse(st.data, evalPoly(c2)) : NaN;
+    $("#b-r1").textContent = Number.isFinite(e1) ? fmtLen(e1) : "—";
+    $("#b-r2").textContent = Number.isFinite(e2) ? fmtLen(e2) : "—";
+    let t = "";
+    if (Number.isFinite(e1) && Number.isFinite(e2)) {
+      t = e2 < e1 * 0.5
+        ? `Dạng bậc hai khớp số đo tốt hơn hẳn: lệch khoảng ${fmtLen(e2)}, so với ${fmtLen(e1)} của đường thẳng. Một đường thẳng không thể vừa đi lên vừa rơi xuống.`
+        : `Với bộ số đo này, hai dạng mô hình lệch gần như nhau. Hãy xem lại cách đo hoặc thêm điểm đo.`;
+      if (!st.custom) t += ` Độ lệch vài centimet là cỡ sai số khi đánh dấu vị trí quả bóng trên video, nên mô hình bậc hai chấp nhận được.`;
+    }
+    $("#b-compare").textContent = t;
+  }
+
+  function update() {
+    inA.value = st.a; inB.value = st.b; inC.value = st.c;
+    $("#b-a-v").textContent = fmt(st.a, 3);
+    $("#b-b-v").textContent = fmt(st.b, 2);
+    $("#b-c-v").textContent = fmt(st.c, 2);
+    const off = st.deg !== 2;
+    inA.disabled = off;
+    $("#b-row-a").classList.toggle("is-off", off);
+    $("#b-deg2").setAttribute("aria-pressed", String(st.deg === 2));
+    $("#b-deg1").setAttribute("aria-pressed", String(st.deg === 1));
+    const eq = polyHTML();
+    $("#b-eq").innerHTML = eq;
+    $("#b-eq2").innerHTML = eq;
+    const r = rmse(st.data, f), cls = r < 0.06 ? "good" : r < 0.2 ? "warn" : "bad";
+    setPill($("#b-rmse"), cls, "Lệch TB " + fmtLen(r));
+    setPill($("#b-rmse2"), cls, fmtLen(r));
+    $("#b-src").textContent = st.custom ? `Số đo của em · ${st.data.length} điểm` : `Dữ liệu mẫu · ${st.data.length} khung hình`;
+    solve();
+    compare();
+  }
+  function refresh() { draw(); update(); }
+
+  inA.addEventListener("input", () => { st.a = +inA.value; refresh(); });
+  inB.addEventListener("input", () => { st.b = +inB.value; refresh(); });
+  inC.addEventListener("input", () => { st.c = +inC.value; refresh(); });
+  $("#b-deg2").addEventListener("click", () => { st.deg = 2; refresh(); });
+  $("#b-deg1").addEventListener("click", () => { st.deg = 1; refresh(); });
+  $("#b-fit").addEventListener("click", () => {
+    const c = polyfit(st.data.map(q => q[0]), st.data.map(q => q[1]), st.deg);
+    if (!c) return;
+    if (st.deg === 2) st.a = clamp(c[2], -1, 0.5);
+    st.b = clamp(c[1], -1, 3);
+    st.c = clamp(c[0], 0, 4);
+    refresh();
+  });
+  $("#b-reset").addEventListener("click", () => { st.a = START.a; st.b = START.b; st.c = START.c; refresh(); });
+  $("#b-use").addEventListener("click", () => {
+    const res = parseData(ta.value);
+    if (res.error) { err.textContent = res.error; err.hidden = false; return; }
+    err.hidden = true;
+    st.data = res.pts; st.custom = true;
+    refresh();
+  });
+  $("#b-sample").addEventListener("click", () => {
+    st.data = SAMPLE.slice(); st.custom = false;
+    ta.value = dataText(SAMPLE); err.hidden = true;
+    refresh();
+  });
+  ta.value = dataText(SAMPLE);
+  refresh();
+  return {};
+})();
+
+/* ---------- Bài 2: Vòng đu quay (hàm số lượng giác) ---------- */
+const Wm = (() => {
+  const wheel = $("#w-wheel"), graph = $("#w-graph");
+  const st = { R: 30, H: 35, T: 12, h0: 50, t: 3.2, playing: false, show: true };
+  let seed = 20261106;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const TREAL = 12.5;
+  const DATA = [];
+  for (let i = 0; i <= 25; i++) {
+    const t = i * 0.5;
+    DATA.push([t, Math.round((35 - 30 * Math.cos(2 * Math.PI * t / TREAL) + (rnd() - 0.5) * 1.4) * 10) / 10]);
+  }
+  const h = t => st.H - st.R * Math.cos(2 * Math.PI * t / st.T);
+  const inR = $("#w-R"), inH = $("#w-H"), inT = $("#w-T"), inH0 = $("#w-h0"), inTime = $("#w-t"), play = $("#w-play"), chk = $("#w-showdata");
+  const fT = v => fmtS(v, 2);
+  function above() {
+    const k = (st.H - st.h0) / st.R;
+    if (k <= -1) return { none: true, k };
+    if (k >= 1) return { all: true, k };
+    const t1 = st.T * Math.acos(k) / (2 * Math.PI);
+    return { k, t1, t2: st.T - t1, dur: st.T - 2 * t1 };
+  }
+
+  function drawWheel() {
+    const GR = 286, TOP = 10, MAXH = 90, S = (GR - TOP) / MAXH, cx = 125;
+    const cy = GR - st.H * S, r = st.R * S, phi = 2 * Math.PI * st.t / st.T;
+    const p = [];
+    for (let hh = 20; hh <= 80; hh += 20) {
+      const y = r1(GR - hh * S);
+      p.push(`<line class="g-minor" x1="0" y1="${y}" x2="250" y2="${y}"/><text x="2" y="${r1(y - 4)}">${hh === 80 ? "80 m" : hh}</text>`);
+    }
+    p.push(`<path class="struct" d="M${r1(cx - r * 0.55)} ${GR} L${cx} ${r1(cy)} L${r1(cx + r * 0.55)} ${GR}"/>`);
+    p.push(`<circle class="wheel-rim" cx="${cx}" cy="${r1(cy)}" r="${r1(r)}"/>`);
+    p.push(`<circle class="wheel-rim thin" cx="${cx}" cy="${r1(cy)}" r="${r1(r * 0.8)}"/>`);
+    const N = 12;
+    for (let k = 0; k < N; k++) {
+      const a = phi + 2 * Math.PI * k / N;
+      p.push(`<line class="spoke" x1="${cx}" y1="${r1(cy)}" x2="${r1(cx + r * Math.sin(a))}" y2="${r1(cy + r * Math.cos(a))}"/>`);
+    }
+    const yh0 = r1(GR - st.h0 * S);
+    p.push(`<line class="thresh" x1="0" y1="${yh0}" x2="250" y2="${yh0}"/>`);
+    for (let k = N - 1; k >= 0; k--) {
+      const a = phi + 2 * Math.PI * k / N, x = cx + r * Math.sin(a), y = cy + r * Math.cos(a);
+      p.push(`<line class="spoke" x1="${r1(x)}" y1="${r1(y)}" x2="${r1(x)}" y2="${r1(y + 3)}"/><rect class="${k ? "cabin" : "cabin-me"}" x="${r1(x - 6)}" y="${r1(y + 3)}" width="12" height="9" rx="2.5"/>`);
+    }
+    p.push(`<circle class="hub" cx="${cx}" cy="${r1(cy)}" r="4"/>`);
+    p.push(`<line class="ground" x1="0" y1="${GR}" x2="250" y2="${GR}"/>`);
+    p.push(`<text class="lbl-red halo" x="248" y="${r1(yh0 - 6)}" text-anchor="end">h₀ = ${fmtS(st.h0)} m</text>`);
+    const mx = cx + r * Math.sin(phi), my = cy + r * Math.cos(phi);
+    const right = mx + 76 < 250 && (mx >= cx || mx - 76 < 0);
+    p.push(`<text class="lbl-acc halo" x="${r1(mx + (right ? 12 : -12))}" y="${r1(my + 12)}" text-anchor="${right ? "start" : "end"}">${fmt(h(st.t), 1)} m</text>`);
+    wheel.innerHTML = p.join("");
+  }
+
+  function drawGraph() {
+    const L = 46, T0 = 12, Wd = 520, Ht = 300, Bm = 34, Rm = 14, PW = Wd - L - Rm, PH = Ht - T0 - Bm;
+    const tMax = Math.max(st.T, 13) * 1.04;
+    const sx = t => L + t / tMax * PW, sy = v => T0 + (1 - v / 90) * PH;
+    const p = [];
+    for (let t = 1; t <= tMax; t += 1) { const X = r1(sx(t)); p.push(`<line class="${t % 2 ? "g-minor" : "g-major"}" x1="${X}" y1="${T0}" x2="${X}" y2="${T0 + PH}"/>`); }
+    for (let v = 10; v < 90; v += 10) { const Y = r1(sy(v)); p.push(`<line class="${v % 20 ? "g-minor" : "g-major"}" x1="${L}" y1="${Y}" x2="${L + PW}" y2="${Y}"/>`); }
+    const a = above();
+    if (a.all) p.push(`<rect class="band" x="${L}" y="${T0}" width="${PW}" height="${PH}"/>`);
+    else if (!a.none) {
+      for (let k = 0; k * st.T < tMax; k++) {
+        const s = Math.max(0, k * st.T + a.t1), e = Math.min(tMax, k * st.T + a.t2);
+        if (e > s) p.push(`<rect class="band" x="${r1(sx(s))}" y="${T0}" width="${r1(sx(e) - sx(s))}" height="${PH}"/>`);
+      }
+    }
+    p.push(`<rect class="frame" x="${L}" y="${T0}" width="${PW}" height="${PH}"/>`);
+    const stepT = tMax > 16 ? 4 : 2, lastT = Math.floor(tMax / stepT) * stepT;
+    for (let t = 0; t <= tMax; t += stepT) p.push(`<text x="${r1(sx(t))}" y="${T0 + PH + 21}" text-anchor="middle">${t === lastT ? t + " phút" : t}</text>`);
+    for (let v = 0; v <= 80; v += 20) p.push(`<text x="${L - 7}" y="${r1(sy(v) + 4)}" text-anchor="end">${v === 80 ? "80 m" : v}</text>`);
+    p.push(`<line class="thresh" x1="${L}" y1="${r1(sy(st.h0))}" x2="${L + PW}" y2="${r1(sy(st.h0))}"/>`);
+    let d = "";
+    for (let i = 0; i <= 320; i++) { const t = tMax * i / 320; d += (i ? "L" : "M") + r1(sx(t)) + " " + r1(sy(h(t))); }
+    p.push(`<path class="curve" d="${d}"/>`);
+    if (st.show) for (const [t, v] of DATA) p.push(`<circle class="dot" cx="${r1(sx(t))}" cy="${r1(sy(v))}" r="3.6"/>`);
+    const X = r1(sx(st.t)), Y = r1(sy(h(st.t)));
+    p.push(`<line class="guide" x1="${X}" y1="${T0}" x2="${X}" y2="${T0 + PH}"/><circle class="mark" cx="${X}" cy="${Y}" r="6"/>`);
+    graph.innerHTML = p.join("");
+  }
+
+  function live() {
+    drawWheel();
+    drawGraph();
+    inTime.value = st.t;
+    $("#w-t-v").textContent = fmt(st.t, 1) + " phút";
+    $("#w-now").textContent = `t = ${fmt(st.t, 1)} phút · h = ${fmt(h(st.t), 1)} m`;
+  }
+
+  function solve() {
+    const a = above(), h0 = fmtS(st.h0);
+    let s = `<p>Cần tìm <var>t</var> để <span class="math"><var>h</var>(<var>t</var>) &gt; ${h0}</span>, tức là</p>
+      <p class="eqline">cos(2π<var>t</var>/${fT(st.T)}) &lt; (${fmtS(st.H)} − ${h0})/${fmtS(st.R)} = ${fmtS(a.k, 3)}</p>`;
+    if (a.none) s += `<div class="verdict bad">Cabin không bao giờ lên tới ${h0} m: điểm cao nhất chỉ là H + R = ${fmtS(st.H + st.R)} m.</div>`;
+    else if (a.all) s += `<div class="verdict info">Cabin luôn ở trên ${h0} m, vì điểm thấp nhất H − R = ${fmtS(st.H - st.R)} m đã cao hơn.</div>`;
+    else s += `<dl class="res">
+        <dt>Bắt đầu vượt ${h0} m</dt><dd>t₁ ≈ ${fmt(a.t1, 2)} phút</dd>
+        <dt>Xuống dưới ${h0} m</dt><dd>t₂ ≈ ${fmt(a.t2, 2)} phút</dd>
+        <dt>Thời gian ở trên ${h0} m</dt><dd>${fmt(a.dur, 2)} phút</dd>
+      </dl>
+      <div class="verdict info">Mỗi vòng, em ở trên ${h0} m khoảng <b>${fmt(a.dur, 1)} phút</b>, bằng ${fmt(a.dur / st.T * 100, 0)}% thời gian một vòng.</div>
+      <p class="hint">Cách tính: t₁ = T·arccos(k)/(2π) và t₂ = T − t₁. Phần tô đỏ trên đồ thị là khoảng thời gian này.</p>`;
+    $("#w-solve").innerHTML = s;
+  }
+
+  function compare() {
+    const r = rmse(DATA, h), cls = r < 1.2 ? "good" : r < 2.5 ? "warn" : "bad";
+    setPill($("#w-rmse"), cls, fmt(r, 1) + " m");
+    const a = above();
+    let t;
+    if (r >= 1.2) t = "Các chấm lệch dần khỏi đường mô hình về cuối vòng: cabin lên đỉnh và về đáy muộn hơn mô hình dự đoán. Có thể vòng quay thật chạy chậm hơn con số ghi trên bảng. Kéo thanh T để làm độ lệch nhỏ nhất.";
+    else t = `Với T = ${fT(st.T)} phút, mô hình khớp số đo, độ lệch chỉ còn cỡ sai số của áp kế.` + (a.dur ? ` Tính lại theo chu kì này, em ở trên ${fmtS(st.h0)} m khoảng ${fmt(a.dur, 2)} phút mỗi vòng.` : "");
+    $("#w-compare").textContent = t;
+  }
+
+  function all() {
+    inR.value = st.R; inH.value = st.H; inT.value = st.T; inH0.value = st.h0; inTime.max = st.T;
+    $("#w-R-v").textContent = fmtS(st.R) + " m";
+    $("#w-H-v").textContent = fmtS(st.H) + " m";
+    $("#w-T-v").textContent = fT(st.T) + " phút";
+    $("#w-h0-v").textContent = fmtS(st.h0) + " m";
+    const eq = `<var>h</var>(<var>t</var>) = ${fmtS(st.H)} − ${fmtS(st.R)}·cos(2π<var>t</var>/${fT(st.T)})`;
+    $("#w-eq").innerHTML = eq;
+    $("#w-eq2").innerHTML = eq;
+    live();
+    solve();
+    compare();
+  }
+
+  let raf = 0, last = null;
+  function loop(ts) {
+    raf = 0;
+    if (!st.playing) { last = null; return; }
+    if (last !== null) { const dt = Math.min(0.1, (ts - last) / 1000); st.t = (st.t + dt * st.T / 8) % st.T; }
+    last = ts;
+    live();
+    raf = requestAnimationFrame(loop);
+  }
+  function setPlaying(v) {
+    st.playing = v;
+    play.textContent = v ? "❚❚ Dừng" : "▶ Cho vòng quay chạy";
+    play.setAttribute("aria-pressed", String(v));
+    if (v && !raf) { last = null; raf = requestAnimationFrame(loop); }
+  }
+
+  play.addEventListener("click", () => setPlaying(!st.playing));
+  chk.addEventListener("change", () => { st.show = chk.checked; live(); });
+  inTime.addEventListener("input", () => { setPlaying(false); st.t = +inTime.value; live(); });
+  inR.addEventListener("input", () => { st.R = +inR.value; if (st.H < st.R + 2) st.H = st.R + 2; all(); });
+  inH.addEventListener("input", () => { st.H = +inH.value; if (st.H < st.R + 2) st.R = Math.max(10, st.H - 2); all(); });
+  inT.addEventListener("input", () => { st.T = +inT.value; if (st.t >= st.T) st.t = 0; all(); });
+  inH0.addEventListener("input", () => { st.h0 = +inH0.value; all(); });
+  $("#w-best").addEventListener("click", () => {
+    let best = st.T, be = Infinity;
+    for (let i = 0; i <= 1000; i++) {
+      st.T = 8 + i * 0.01;
+      const e = rmse(DATA, h);
+      if (e < be) { be = e; best = st.T; }
+    }
+    st.T = Math.round(best * 100) / 100;
+    if (st.t >= st.T) st.t = 0;
+    all();
+  });
+  all();
+  return { pause: () => setPlaying(false) };
+})();
+
+/* ---------- Bài 3: Hộp giấy (ứng dụng đạo hàm) ---------- */
+const Pm = (() => {
+  const net = $("#h-net"), graph = $("#h-graph"), inX = $("#h-x"), meas = $("#h-meas");
+  const PRE = {
+    a4: { W: 21, L: 29.7, name: "tờ giấy A4 (21 × 29,7 cm)" },
+    sq: { W: 20, L: 20, name: "tờ giấy vuông cạnh 20 cm" },
+    bia: { W: 30, L: 40, name: "tấm bìa cứng 30 × 40 cm" }
+  };
+  const st = { key: "a4", W: 21, L: 29.7, x: 2.5 };
+  const V = x => x * (st.W - 2 * x) * (st.L - 2 * x);
+  const dV = x => 12 * x * x - 4 * (st.W + st.L) * x + st.W * st.L;
+  const half = () => Math.min(st.W, st.L) / 2;
+  function crit() { const s = st.W + st.L, q = Math.sqrt(s * s - 3 * st.W * st.L); return [(s - q) / 6, (s + q) / 6]; }
+  const COS = Math.cos(Math.PI / 6);
+
+  function drawNet() {
+    const p = [];
+    p.push(`<defs><pattern id="h-hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line class="hatch-line" x1="0" y1="0" x2="0" y2="7"/></pattern></defs>`);
+    const s = Math.min(196 / st.W, 232 / st.L);
+    const w = st.W * s, l = st.L * s, ox = 30 + (196 - w) / 2, oy = 18 + (232 - l) / 2, xs = st.x * s;
+    p.push(`<rect class="sheet" x="${r1(ox)}" y="${r1(oy)}" width="${r1(w)}" height="${r1(l)}"/>`);
+    for (const [cx, cy] of [[ox, oy], [ox + w - xs, oy], [ox, oy + l - xs], [ox + w - xs, oy + l - xs]]) {
+      p.push(`<rect class="cut" fill="url(#h-hatch)" x="${r1(cx)}" y="${r1(cy)}" width="${r1(xs)}" height="${r1(xs)}"/>`);
+    }
+    p.push(`<rect class="fold" x="${r1(ox + xs)}" y="${r1(oy + xs)}" width="${r1(w - 2 * xs)}" height="${r1(l - 2 * xs)}"/>`);
+    p.push(`<text x="${r1(ox + w / 2)}" y="${r1(oy + l + 18)}" text-anchor="middle">${fmtS(st.W, 1)} cm</text>`);
+    const lx = r1(ox - 9), ly = r1(oy + l / 2);
+    p.push(`<text x="${lx}" y="${ly}" text-anchor="middle" transform="rotate(-90 ${lx} ${ly})">${fmtS(st.L, 1)} cm</text>`);
+    p.push(`<text class="lbl-red" x="${r1(ox + xs / 2)}" y="${r1(oy - 4)}" text-anchor="middle">x</text>`);
+    p.push(`<text class="lbl-red" x="249" y="134" text-anchor="middle">gấp</text><path class="arrow" d="M234 146 H262 M256 140 L262 146 L256 152"/>`);
+
+    /* Hộp vẽ theo phép chiếu trục đo */
+    const bw = st.W - 2 * st.x, bl = st.L - 2 * st.x, hz = st.x;
+    const maxW = (st.W + st.L) * COS, maxH = (st.W + st.L) * 0.5 + half();
+    const k = Math.min(226 / maxW, 236 / maxH) * 0.9;
+    const Pr = (X, Y, Z) => [(X - Y) * COS * k, (X + Y) * 0.5 * k - Z * k];
+    const pts = { A: Pr(0, 0, 0), B: Pr(bw, 0, 0), C: Pr(bw, bl, 0), D: Pr(0, bl, 0), A2: Pr(0, 0, hz), B2: Pr(bw, 0, hz), C2: Pr(bw, bl, hz), D2: Pr(0, bl, hz) };
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const q of Object.values(pts)) { minX = Math.min(minX, q[0]); maxX = Math.max(maxX, q[0]); minY = Math.min(minY, q[1]); maxY = Math.max(maxY, q[1]); }
+    const dx = 390 - (minX + maxX) / 2, dy = 136 - (minY + maxY) / 2;
+    const T = q => r1(q[0] + dx) + "," + r1(q[1] + dy);
+    const poly = (cls, ...ks) => `<polygon class="${cls}" points="${ks.map(n => T(pts[n])).join(" ")}"/>`;
+    p.push(poly("face-in", "A", "B", "C", "D"));
+    p.push(poly("face-in2", "A", "B", "B2", "A2"));
+    p.push(poly("face-in2", "A", "D", "D2", "A2"));
+    p.push(poly("face-r", "B", "C", "C2", "B2"));
+    p.push(poly("face-l", "D", "C", "C2", "D2"));
+    const mid = (a, b) => [(pts[a][0] + pts[b][0]) / 2 + dx, (pts[a][1] + pts[b][1]) / 2 + dy];
+    const m1 = mid("D", "C"), m2 = mid("B", "C"), m3 = mid("C", "C2");
+    p.push(`<text class="halo" x="${r1(m1[0] - 8)}" y="${r1(m1[1] + 18)}" text-anchor="end">${fmt(bw, 1)}</text>`);
+    p.push(`<text class="halo" x="${r1(m2[0] + 8)}" y="${r1(m2[1] + 18)}" text-anchor="start">${fmt(bl, 1)}</text>`);
+    p.push(`<text class="lbl-red halo" x="${r1(m3[0] + 8)}" y="${r1(m3[1] + 5)}" text-anchor="start">x = ${fmt(hz, 1)}</text>`);
+    p.push(`<text x="390" y="282" text-anchor="middle">Hộp ${fmt(bw, 1)} × ${fmt(bl, 1)} × ${fmt(hz, 1)} cm</text>`);
+    net.innerHTML = p.join("");
+  }
+
+  function drawGraph() {
+    const L = 58, T0 = 14, Wd = 520, Ht = 250, Bm = 32, Rm = 14, PW = Wd - L - Rm, PH = Ht - T0 - Bm;
+    const m = half(), [x1] = crit(), vmax = V(x1);
+    const step = niceStep(vmax * 1.12 / 6), top = Math.ceil(vmax * 1.12 / step) * step;
+    const sx = x => L + x / m * PW, sy = v => T0 + (1 - v / top) * PH;
+    const p = [];
+    const xStep = m > 12 ? 2 : 1;
+    for (let x = xStep; x < m; x += xStep) { const X = r1(sx(x)); p.push(`<line class="g-minor" x1="${X}" y1="${T0}" x2="${X}" y2="${T0 + PH}"/>`); }
+    for (let v = step; v <= top + 1e-9; v += step) { const Y = r1(sy(v)); p.push(`<line class="g-major" x1="${L}" y1="${Y}" x2="${L + PW}" y2="${Y}"/>`); }
+    p.push(`<rect class="frame" x="${L}" y="${T0}" width="${PW}" height="${PH}"/>`);
+    const lastX = Math.floor((m - 1e-9) / xStep) * xStep;
+    for (let x = 0; x < m; x += xStep) p.push(`<text x="${r1(sx(x))}" y="${T0 + PH + 21}" text-anchor="middle">${x === lastX ? x + " cm" : x}</text>`);
+    for (let v = 0; v <= top + 1e-9; v += step) p.push(`<text x="${L - 7}" y="${r1(sy(v) + 4)}" text-anchor="end">${fmtS(v)}</text>`);
+    p.push(`<text x="${L + 8}" y="${T0 + 16}">V (cm³)</text>`);
+    let d = "";
+    for (let i = 0; i <= 300; i++) { const x = m * i / 300; d += (i ? "L" : "M") + r1(sx(x)) + " " + r1(sy(Math.max(0, V(x)))); }
+    p.push(`<path class="curve" d="${d}"/>`);
+    const MX = r1(sx(x1)), MY = r1(sy(vmax));
+    p.push(`<line class="guide" x1="${MX}" y1="${MY}" x2="${MX}" y2="${T0 + PH}"/><line class="guide" x1="${L}" y1="${MY}" x2="${MX}" y2="${MY}"/>`);
+    p.push(`<circle class="mark" cx="${MX}" cy="${MY}" r="6"/>`);
+    p.push(`<text class="lbl-acc halo" x="${r1(clamp(sx(x1), L + 90, L + PW - 90))}" y="${r1(MY - 13)}" text-anchor="middle">lớn nhất ≈ ${fmt(vmax, 1)} cm³</text>`);
+    const X = sx(st.x), Y = sy(V(st.x));
+    const kx = PW / m, ky = PH / top, mpx = -dV(st.x) * ky / kx, n = Math.hypot(1, mpx), ux = 48 / n, uy = mpx * 48 / n;
+    p.push(`<line class="tangent" x1="${r1(X - ux)}" y1="${r1(Y - uy)}" x2="${r1(X + ux)}" y2="${r1(Y + uy)}"/>`);
+    p.push(`<circle class="mark-r" cx="${r1(X)}" cy="${r1(Y)}" r="5.5"/>`);
+    graph.innerHTML = p.join("");
+  }
+
+  function solve() {
+    const [x1, x2] = crit(), m = half(), vmax = V(x1), dv = dV(st.x);
+    let s = `<p class="eqline"><var>V</var>′(<var>x</var>) = 12<var>x</var>² − ${fmtS(4 * (st.W + st.L), 2)}<var>x</var> + ${fmtS(st.W * st.L, 2)}</p>
+      <p><span class="math"><var>V</var>′(<var>x</var>) = 0</span> có hai nghiệm <span class="math"><var>x</var> ≈ ${fmt(x1, 2)}</span> (nhận) và <span class="math"><var>x</var> ≈ ${fmt(x2, 2)}</span> (loại vì không thỏa <span class="math">0 &lt; <var>x</var> &lt; ${fmtS(m, 2)}</span>). Qua <span class="math"><var>x</var> ≈ ${fmt(x1, 2)}</span>, <span class="math"><var>V</var>′</span> đổi dấu từ dương sang âm nên <span class="math"><var>V</var></span> đạt giá trị lớn nhất tại đó.</p>
+      <dl class="res">
+        <dt>Cạnh cắt tốt nhất</dt><dd>${fmt(x1, 2)} cm</dd>
+        <dt>Thể tích lớn nhất</dt><dd>${fmt(vmax, 1)} cm³</dd>
+        <dt>Đổi ra lít</dt><dd>≈ ${fmt(vmax / 1000, 2)} lít</dd>
+      </dl>`;
+    let v, cls;
+    if (Math.abs(st.x - x1) < 0.06) { v = `Tại x = ${fmt(st.x, 2)} cm, V′(x) ≈ 0: em đang ở đúng điểm cực đại, tiếp tuyến đỏ gần như nằm ngang.`; cls = "good"; }
+    else if (dv > 0) { v = `Tại x = ${fmt(st.x, 2)} cm, V′(x) ≈ ${fmtS(dv, 1)} &gt; 0: thể tích còn tăng nếu cắt rộng thêm.`; cls = "warn"; }
+    else { v = `Tại x = ${fmt(st.x, 2)} cm, V′(x) ≈ ${fmtS(dv, 1)} &lt; 0: thể tích đang giảm, nên cắt hẹp lại.`; cls = "warn"; }
+    s += `<div class="verdict ${cls}">${v}</div>`;
+    $("#h-solve").innerHTML = s;
+  }
+
+  function compare() {
+    const [x1] = crit(), vmax = V(x1);
+    const drop = (1 - Math.min(V(x1 - 0.2), V(x1 + 0.2)) / vmax) * 100;
+    const vg = V(2), lg = (1 - vg / vmax) * 100;
+    $("#h-compare").innerHTML = `<p>Cắt lệch 2 mm so với cạnh tốt nhất, thể tích chỉ giảm khoảng <b>${fmt(drop, 2)}%</b>. Gần điểm cực đại, tiếp tuyến gần như nằm ngang (<span class="math"><var>V</var>′ ≈ 0</span>) nên sai số nhỏ khi cắt hầu như không ảnh hưởng.</p>
+      <p>Ngược lại, nếu đoán bừa <span class="math"><var>x</var> = 2</span> cm thì thể tích chỉ khoảng ${fmt(vg, 1)} cm³, ít hơn ${fmt(lg, 1)}% so với tốt nhất.</p>`;
+  }
+
+  function measure() {
+    const out = $("#h-meas-out");
+    const mv = parseFloat(String(meas.value).replace(/\./g, "").replace(",", "."));
+    if (!(mv > 0)) { out.className = "hint"; out.textContent = "Nhập số đo để so với mô hình."; return; }
+    const vm = V(st.x), d = (mv - vm) / vm * 100;
+    const tail = d < -2 ? " Hộp thật đựng ít hơn tính toán, đúng như dự đoán vì có mép gấp và giấy có độ dày."
+      : d > 2 ? " Hộp thật đựng nhiều hơn tính toán: kiểm tra lại cách đong hoặc số đo các cạnh."
+      : " Mô hình rất sát với thực tế.";
+    out.className = "verdict info";
+    out.textContent = `Mô hình cho V(${fmt(st.x, 2)}) ≈ ${fmt(vm, 1)} cm³. Số đo của em chênh ${d >= 0 ? "+" : "−"}${fmt(Math.abs(d), 1)}%.${tail}`;
+  }
+
+  function update() {
+    const m = half();
+    inX.max = String(Math.round((m - 0.1) * 100) / 100);
+    inX.value = st.x;
+    $("#h-x-v").textContent = fmt(st.x, 2) + " cm";
+    $$(".h-name").forEach(e => { e.textContent = PRE[st.key].name; });
+    $$("#h-presets button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.k === st.key)));
+    const Wt = fmtS(st.W, 1), Lt = fmtS(st.L, 1);
+    const eq = `<var>V</var>(<var>x</var>) = <var>x</var>(${Wt} − 2<var>x</var>)(${Lt} − 2<var>x</var>)`;
+    $("#h-eq").innerHTML = eq;
+    $("#h-eq2").innerHTML = eq;
+    $("#h-expand").innerHTML = `= 4<var>x</var>³ − ${fmtS(2 * (st.W + st.L), 2)}<var>x</var>² + ${fmtS(st.W * st.L, 2)}<var>x</var>`;
+    $("#h-dom").innerHTML = `0 &lt; <var>x</var> &lt; ${fmtS(m, 2)}`;
+    $("#h-base").innerHTML = `(${Wt} − 2<var>x</var>) × (${Lt} − 2<var>x</var>)`;
+    setPill($("#h-vol"), "info", "V ≈ " + fmt(V(st.x), 1) + " cm³");
+    solve();
+    compare();
+    measure();
+  }
+  function refresh() { drawNet(); drawGraph(); update(); }
+
+  inX.addEventListener("input", () => { st.x = +inX.value; refresh(); });
+  $$("#h-presets button").forEach(b => b.addEventListener("click", () => {
+    const pr = PRE[b.dataset.k];
+    st.key = b.dataset.k; st.W = pr.W; st.L = pr.L;
+    st.x = clamp(st.x, 0.1, half() - 0.1);
+    refresh();
+  }));
+  meas.addEventListener("input", measure);
+  refresh();
+  return {};
+})();
+
+/* ---------- Đề của em: Gemini đọc đề, trang tự dựng mô hình ---------- */
+const G = (() => {
+  const box = $("#g-input"), runBtn = $("#g-run"), stopBtn = $("#g-stop"), statusEl = $("#g-status");
+  const svg = $("#g-plot"), paramsBox = $("#g-params"), inP = $("#g-probe");
+  const imgBtn = $("#g-img-btn"), imgIn = $("#g-img"), imgRow = $("#g-img-row"), imgName = $("#g-img-name");
+  const EXAMPLES = [
+    "Bác An gửi tiết kiệm 100 triệu đồng vào ngân hàng với lãi suất 6% một năm, theo hình thức lãi kép (lãi mỗi năm được nhập vào gốc). Hỏi sau ít nhất bao nhiêu năm thì bác An có từ 150 triệu đồng trở lên?",
+    "Sau khi tiêm, nồng độ một loại thuốc trong máu của bệnh nhân sau t giờ được cho bởi công thức C(t) = 30t/(t² + 2) (mg/l). Hỏi sau bao nhiêu giờ thì nồng độ thuốc trong máu cao nhất và giá trị cao nhất đó là bao nhiêu?",
+    "Một người cần xây một bể chứa nước dạng hình hộp chữ nhật không nắp, đáy là hình vuông, có thể tích 2 m³. Chi phí xây đáy và thành bể đều là 500 nghìn đồng mỗi mét vuông. Hỏi cạnh đáy bể bằng bao nhiêu mét để chi phí xây bể thấp nhất?"
+  ];
+  /* Ví dụ dựng sẵn, để thẻ có nội dung ngay khi mở (không tốn lượt gọi Gemini) */
+  const EXAMPLE_RAW = {
+    supported: true,
+    title: "Nồng độ thuốc trong máu",
+    chapter: "Lớp 12 · Chương I · Ứng dụng đạo hàm",
+    situation: "Sau khi tiêm, nồng độ thuốc trong máu thay đổi theo thời gian theo công thức C(t) = 30t/(t² + 2) (mg/l), với t tính bằng giờ.",
+    question: "Sau bao nhiêu giờ thì nồng độ thuốc trong máu cao nhất, và cao nhất bằng bao nhiêu?",
+    variable: { symbol: "t", name: "thời gian sau khi tiêm", unit: "giờ", min: 0, max: 12 },
+    output: { symbol: "C", name: "nồng độ thuốc trong máu", unit: "mg/l" },
+    params: [
+      { symbol: "k", name: "hệ số liều thuốc", unit: "", value: 30, min: 10, max: 60, step: 1 },
+      { symbol: "c", name: "hằng số hấp thụ", unit: "", value: 2, min: 0.5, max: 6, step: 0.1 }
+    ],
+    expr: "k*t/(t^2+c)",
+    goal: { type: "max", target: null, at: null },
+    modelSteps: ["Gọi t (giờ) là thời gian kể từ lúc tiêm, t ≥ 0.", "Nồng độ thuốc là hàm số C(t) = k·t/(t² + c), với k = 30 và c = 2 theo đề."],
+    assumptions: ["Công thức đề cho đúng với người bệnh đang xét.", "Không tiêm thêm liều nào khác trong thời gian xét."],
+    solution: ["C′(t) = k(c − t²)/(t² + c)².", "C′(t) = 0 ⇔ t = √c = √2 ≈ 1,41 (vì t ≥ 0).", "C′ đổi dấu từ dương sang âm tại t = √2 nên C đạt giá trị lớn nhất tại đó.", "C(√2) = 30√2/4 ≈ 10,61 mg/l."],
+    answer: "Sau khoảng 1,41 giờ (≈ 1 giờ 25 phút), nồng độ cao nhất ≈ 10,61 mg/l.",
+    reality: ["Mỗi người hấp thụ và đào thải thuốc khác nhau, nên k và c thay đổi theo từng người.", "Công thức chỉ là mô hình gần đúng; nồng độ thật phải đo bằng xét nghiệm máu ở vài thời điểm."],
+    experiment: "Tìm bảng số liệu nồng độ đo thực tế ở vài thời điểm (trong sách hoặc tài liệu dược học), chấm lên đồ thị rồi chỉnh k, c cho khớp."
+  };
+  const SCHEMA = `{
+  "supported": true,
+  "title": "tên ngắn của bài (không quá 6 từ)",
+  "chapter": "Lớp …, Chương … · tên chương trong sách Kết nối tri thức",
+  "situation": "tóm tắt tình huống, 1–2 câu",
+  "question": "câu hỏi cần trả lời",
+  "variable": {"symbol": "x", "name": "ý nghĩa của biến", "unit": "đơn vị", "min": 0, "max": "a/2"},
+  "output": {"symbol": "V", "name": "ý nghĩa của hàm số", "unit": "đơn vị"},
+  "params": [{"symbol": "a", "name": "ý nghĩa", "unit": "đơn vị", "value": 21, "min": 10, "max": 40, "step": 0.5}],
+  "expr": "x*(a-2*x)^2",
+  "goal": {"type": "max", "target": null, "at": null},
+  "modelSteps": ["các bước đặt biến, điều kiện, lập hàm số"],
+  "assumptions": ["các giả thiết đơn giản hóa"],
+  "solution": ["các bước giải bằng toán (đạo hàm, biến đổi…)"],
+  "answer": "đáp số ngắn, kèm đơn vị",
+  "reality": ["đối chiếu với thực tế: mô hình đúng tới đâu, sai số, giới hạn"],
+  "experiment": "một cách học sinh có thể đo hoặc kiểm chứng ngoài đời"
+}`;
+  function buildPrompt(text, hasImg) {
+    return [
+      "Bạn giúp học sinh THPT Việt Nam mô hình hóa bài toán thực tế (Chương trình GDPT 2018, sách Toán Kết nối tri thức với cuộc sống lớp 10–12).",
+      hasImg ? "Ảnh kèm theo là ảnh chụp đề bài: đọc đề trong ảnh. Phần chữ bên dưới (nếu có) là ghi chú thêm." : "",
+      "Hãy đưa bài toán về MỘT hàm số một biến vẽ được đồ thị, rồi trả lời bằng DUY NHẤT một đối tượng JSON đúng khuôn sau, không thêm chữ nào khác:",
+      SCHEMA,
+      "Quy tắc:",
+      "- expr chỉ dùng: số (dấu chấm thập phân), kí hiệu biến, kí hiệu tham số, + - * / ^, ngoặc tròn, các hàm sin cos tan asin acos atan sqrt abs exp ln log (log là cơ số 10), hằng số pi và e. Luôn viết * cho phép nhân (2*x, không viết 2x). Lượng giác dùng radian.",
+      "- Kí hiệu biến, hàm và tham số: chữ cái Latin không dấu, có thể kèm số (x, t, r, P0); không trùng tên hàm.",
+      "- Đưa 1 đến 4 con số quan trọng của đề thành params với value đúng như đề; min, max là khoảng hợp lí quanh value để học sinh kéo thử.",
+      "- variable.min và variable.max là số hoặc biểu thức theo tham số (ví dụ \"a/2\"), là khoảng đáng vẽ của biến.",
+      "- goal.type: \"max\"/\"min\" (tìm giá trị lớn nhất/nhỏ nhất), \"value_at\" (tính hàm số tại goal.at), \"solve\" (tìm biến để hàm số = goal.target), \"above\"/\"below\" (khi nào hàm số > hoặc < goal.target), \"none\".",
+      "- Câu chữ bằng tiếng Việt, ngắn gọn, dùng dấu phẩy thập phân; công thức trong câu chữ viết dễ đọc (x², √, ·, π), không dùng LaTeX. Mỗi mảng tối đa 5 dòng.",
+      "- Nếu đề không đưa được về một hàm số một biến (ví dụ bài chứng minh hình học, bài đếm tổ hợp), trả về {\"supported\": false, \"reason\": \"lí do ngắn\"}.",
+      "ĐỀ BÀI:",
+      '"""',
+      text || "(xem ảnh)",
+      '"""'
+    ].filter(Boolean).join("\n");
+  }
+
+  let img = null, ctl = null;
+  const imgLimits = { mediaTypes: ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"], maxInputBytes: 20 * 1024 * 1024 };
+  let model = null, env = Object.create(null), probe = 0, range = [0, 1];
+  const node = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const listOf = (items, ordered) => { const l = node(ordered ? "ol" : "ul", "plain-list"); items.forEach(t => l.append(node("li", null, t))); return l; };
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const fmtAuto = v => { if (!Number.isFinite(v)) return "—"; const a = Math.abs(v); return fmt(v, a >= 1000 ? 0 : a >= 100 ? 1 : a >= 1 ? 2 : a >= 0.01 ? 3 : 4); };
+  const withUnit = (v, u) => fmtAuto(v) + (u ? " " + u : "");
+  const tickFmt = (v, step) => { const d = Math.max(0, Math.min(4, -Math.floor(Math.log10(step) + 1e-9))); return fmtS(Math.round(v / step) * step, d); };
+  const pretty = src => String(src).replace(/\s+/g, "").replace(/\*/g, "·").replace(/\^2(?![0-9.])/g, "²").replace(/\^3(?![0-9.])/g, "³").replace(/sqrt/g, "√").replace(/\bpi\b/g, "π").replace(/-/g, " − ").replace(/\+/g, " + ").replace(/\./g, ",").replace(/^ − /, "−");
+  const fx = x => { env[model.vsym] = x; let y; try { y = model.f(env); } catch (e) { y = NaN; } return y; };
+  const target = () => { const g = model.goal; return g.type === "solve" || g.type === "above" || g.type === "below" ? g.target : NaN; };
+  function setStatus(cls, text) { statusEl.className = "status " + cls; statusEl.textContent = text; }
+
+  function updateRange(resetProbe) {
+    let a = Number(model.vmin(env)), b = Number(model.vmax(env));
+    if (!Number.isFinite(a)) a = 0;
+    if (!Number.isFinite(b) || b <= a) b = a + 10;
+    range = [a, b];
+    inP.min = String(a);
+    inP.max = String(b);
+    if (resetProbe || probe < a || probe > b) probe = a + (b - a) * 0.3;
+  }
+
+  function solveGoal() {
+    const g = model.goal, [a, b] = range;
+    try {
+      if (g.type === "max" || g.type === "min") { const r = extremum(fx, a, b, g.type === "max"); return r ? { pts: [r], ext: r } : null; }
+      if (g.type === "value_at" && Number.isFinite(g.at)) return { pts: [{ x: g.at, y: fx(g.at) }], at: true };
+      if (g.type === "solve" && Number.isFinite(g.target)) { const rs = roots(x => fx(x) - g.target, a, b); return { pts: rs.map(x => ({ x, y: g.target })), sols: rs }; }
+      if ((g.type === "above" || g.type === "below") && Number.isFinite(g.target)) {
+        const gg = x => fx(x) - g.target;
+        return { iv: intervalsWhere(gg, a, b, g.type === "above"), pts: roots(gg, a, b).map(x => ({ x, y: g.target })) };
+      }
+    } catch (e) { /* bỏ qua, coi như không tính được */ }
+    return null;
+  }
+
+  function draw(sol) {
+    const Wd = 560, Ht = 340, ML = 60, MR = 16, MT = 18, MB = 36, PW = Wd - ML - MR, PH = Ht - MT - MB;
+    const [a, b] = range, N = 400, xs = [], ys = [];
+    for (let k = 0; k <= N; k++) { const x = a + (b - a) * k / N, y = fx(x); xs.push(x); ys.push(Number.isFinite(y) ? y : NaN); }
+    const fin = ys.filter(Number.isFinite).sort((p, q) => p - q);
+    if (!fin.length) { svg.innerHTML = `<text x="280" y="170" text-anchor="middle">Hàm số không xác định trên khoảng đang xét</text>`; return; }
+    let lo = fin[0], hi = fin[fin.length - 1];
+    const qt = t => fin[Math.round(t * (fin.length - 1))];
+    const p02 = qt(0.02), p98 = qt(0.98);
+    if (p98 > p02 && hi - lo > 6 * (p98 - p02)) { lo = p02; hi = p98; }
+    const tg = target();
+    if (Number.isFinite(tg)) { lo = Math.min(lo, tg); hi = Math.max(hi, tg); }
+    if (lo > 0 && lo <= hi * 0.5) lo = 0;
+    if (hi < 0 && hi >= lo * 0.5) hi = 0;
+    if (hi - lo < 1e-9) { lo -= 1; hi += 1; }
+    const yst = niceStep((hi - lo) / 5), y0 = Math.floor(lo / yst + 1e-9) * yst, y1 = Math.ceil((hi + (hi - lo) * 0.06) / yst - 1e-9) * yst;
+    const xst = niceStep((b - a) / 7);
+    const sx = x => ML + (x - a) / (b - a) * PW, sy = y => MT + (y1 - y) / (y1 - y0) * PH;
+    const p = [`<defs><clipPath id="g-clip"><rect x="${ML}" y="${MT}" width="${PW}" height="${PH}"/></clipPath></defs>`];
+    if (sol && sol.iv) for (const [s, e] of sol.iv) p.push(`<rect class="band" x="${r1(sx(s))}" y="${MT}" width="${r1(sx(e) - sx(s))}" height="${PH}"/>`);
+    for (let v = y0; v <= y1 + yst * 1e-6; v += yst) { const Y = r1(sy(v)); p.push(`<line class="g-major" x1="${ML}" y1="${Y}" x2="${ML + PW}" y2="${Y}"/><text x="${ML - 7}" y="${r1(Y + 4)}" text-anchor="end">${tickFmt(v, yst)}</text>`); }
+    const xt = [];
+    for (let v = Math.ceil(a / xst - 1e-9) * xst; v <= b + xst * 1e-6; v += xst) xt.push(v);
+    xt.forEach((v, k) => {
+      const X = r1(sx(v)), last = k === xt.length - 1;
+      const lbl = tickFmt(v, xst) + (last && model.vunit ? " " + model.vunit : "");
+      const nearRight = last && X > ML + PW - 40;
+      p.push(`<line class="g-minor" x1="${X}" y1="${MT}" x2="${X}" y2="${MT + PH}"/><text x="${nearRight ? ML + PW : X}" y="${MT + PH + 21}" text-anchor="${nearRight ? "end" : "middle"}">${esc(lbl)}</text>`);
+    });
+    p.push(`<rect class="frame" x="${ML}" y="${MT}" width="${PW}" height="${PH}"/>`);
+    if (y0 < 0 && y1 > 0) p.push(`<line class="axis" x1="${ML}" y1="${r1(sy(0))}" x2="${ML + PW}" y2="${r1(sy(0))}"/>`);
+    p.push(`<g clip-path="url(#g-clip)">`);
+    if (Number.isFinite(tg)) p.push(`<line class="thresh" x1="${ML}" y1="${r1(sy(tg))}" x2="${ML + PW}" y2="${r1(sy(tg))}"/>`);
+    let d = "", pen = false;
+    const lim = (y1 - y0) * 3;
+    for (let k = 0; k <= N; k++) {
+      const y = ys[k];
+      if (!Number.isFinite(y) || y > y1 + lim || y < y0 - lim) { pen = false; continue; }
+      d += (pen ? "L" : "M") + r1(sx(xs[k])) + " " + r1(sy(y));
+      pen = true;
+    }
+    p.push(`<path class="curve" d="${d}"/>`);
+    const py = fx(probe);
+    if (Number.isFinite(py)) p.push(`<line class="guide" x1="${r1(sx(probe))}" y1="${MT}" x2="${r1(sx(probe))}" y2="${MT + PH}"/><circle class="mark-r" cx="${r1(sx(probe))}" cy="${r1(sy(py))}" r="5.5"/>`);
+    if (sol) for (const pt of sol.pts.slice(0, 6)) {
+      if (!Number.isFinite(pt.y) || !Number.isFinite(pt.x)) continue;
+      const X = sx(pt.x), Y = sy(pt.y);
+      p.push(`<circle class="mark" cx="${r1(X)}" cy="${r1(Y)}" r="6"/><text class="lbl-acc halo" x="${r1(clamp(X, ML + 64, ML + PW - 64))}" y="${r1(Y < MT + 34 ? Y + 24 : Y - 12)}" text-anchor="middle">(${fmtAuto(pt.x)}; ${fmtAuto(pt.y)})</text>`);
+    }
+    p.push(`</g>`);
+    if (Number.isFinite(tg)) p.push(`<text class="lbl-red halo" x="${ML + PW - 6}" y="${r1(sy(tg) - 7)}" text-anchor="end">${esc(model.osym)} = ${fmtAuto(tg)}</text>`);
+    p.push(`<text class="halo" x="${ML + 8}" y="${MT + 16}">${esc(model.osym + (model.ounit ? " (" + model.ounit + ")" : ""))}</text>`);
+    svg.innerHTML = p.join("");
+  }
+
+  function live(sol) {
+    const out = $("#g-live");
+    out.replaceChildren();
+    const g = model.goal, O = model.osym, X = model.vsym;
+    const dl = node("dl", "res");
+    const row = (k, v) => dl.append(node("dt", null, k), node("dd", null, v));
+    if (!sol) out.append(node("p", "hint", g.type === "none" ? "Đề không có đại lượng cần tính thêm; xem đồ thị và kéo thanh trượt." : "Không tính được trên khoảng đang xét."));
+    else if (sol.ext) {
+      row(g.type === "max" ? "Giá trị lớn nhất" : "Giá trị nhỏ nhất", withUnit(sol.ext.y, model.ounit));
+      row(`Đạt tại ${X} ≈`, withUnit(sol.ext.x, model.vunit));
+      out.append(dl);
+      if (sol.ext.edge) out.append(node("p", "hint", "Giá trị này nằm ở đầu mút của khoảng đang vẽ. Kiểm tra lại điều kiện của biến trong đề."));
+    } else if (sol.at) {
+      row(`${O}(${fmtAuto(g.at)})`, withUnit(sol.pts[0].y, model.ounit));
+      out.append(dl);
+    } else if (sol.sols) {
+      if (sol.sols.length) row(`${O} = ${fmtAuto(g.target)} khi ${X} ≈`, sol.sols.slice(0, 4).map(fmtAuto).join("; ") + (model.vunit ? " " + model.vunit : ""));
+      else row(`${O} = ${fmtAuto(g.target)}`, "không có nghiệm trên khoảng đang xét");
+      out.append(dl);
+    } else if (sol.iv) {
+      row(`${O} ${g.type === "above" ? ">" : "<"} ${fmtAuto(g.target)} khi ${X} ∈`, sol.iv.length ? sol.iv.slice(0, 4).map(([s, e]) => `(${fmtAuto(s)}; ${fmtAuto(e)})`).join(" ∪ ") : "không có");
+      if (sol.iv.length) row("Tổng độ dài", withUnit(sol.iv.reduce((s, [p, q]) => s + q - p, 0), model.vunit));
+      out.append(dl);
+    }
+    if (model.params.some(p => Math.abs(env[p.sym] - p.init) > 1e-9)) out.append(node("p", "hint", "Em đang đổi số liệu so với đề, nên kết quả này khác đáp số ở trên."));
+  }
+
+  function readout() {
+    const eq = `${model.osym}(${model.vsym}) = ${pretty(model.exprText)}`;
+    $("#g-eq").textContent = eq;
+    $("#g-probe-v").textContent = withUnit(probe, model.vunit);
+    $("#g-now").textContent = `${model.vsym} = ${fmtAuto(probe)} → ${model.osym} ≈ ${withUnit(fx(probe), model.ounit)}`;
+    const eq2 = $("#g-eq2");
+    if (eq2) eq2.textContent = eq;
+  }
+
+  function refresh() {
+    const sol = solveGoal();
+    draw(sol);
+    live(sol);
+    readout();
+    inP.value = String(probe);
+  }
+
+  function buildParams() {
+    paramsBox.replaceChildren();
+    model.params.forEach((p, i) => {
+      const id = "g-p-" + i, row = node("div", "sl sl-g");
+      const lab = node("label");
+      lab.htmlFor = id;
+      lab.append(node("var", null, p.sym), document.createTextNode(" " + (p.name || "")));
+      const inp = node("input");
+      inp.type = "range"; inp.id = id;
+      inp.min = String(p.min); inp.max = String(p.max); inp.step = String(p.step); inp.value = String(env[p.sym]);
+      const out = node("output", null, withUnit(env[p.sym], p.unit));
+      out.setAttribute("for", id);
+      inp.addEventListener("input", () => { env[p.sym] = +inp.value; out.textContent = withUnit(env[p.sym], p.unit); updateRange(false); refresh(); });
+      row.append(lab, inp, out);
+      paramsBox.append(row);
+      p.input = inp; p.out = out;
+    });
+    $("#g-reset").hidden = !model.params.length;
+  }
+
+  function fillSteps() {
+    const m = model;
+    $("#g-title").textContent = m.title || "Đề của em";
+    const s1 = $("#g-s1");
+    s1.replaceChildren();
+    if (m.chapter) s1.append(node("span", "pill info", m.chapter));
+    if (m.situation) s1.append(node("p", null, m.situation));
+    if (m.question) { const q = node("div", "q"); q.append(node("span", "q-lbl", "Câu hỏi"), node("p", null, m.question)); s1.append(q); }
+    const s2 = $("#g-s2");
+    s2.replaceChildren();
+    if (m.modelSteps.length) s2.append(listOf(m.modelSteps));
+    const eq = node("p", "eqline");
+    eq.id = "g-eq2";
+    s2.append(eq);
+    s2.append(node("p", "hint", `${m.vsym}: ${m.vname || "biến"}${m.vunit ? " (" + m.vunit + ")" : ""}; đồ thị vẽ từ ${fmtAuto(range[0])} đến ${fmtAuto(range[1])}.`));
+    if (m.assumptions.length) { const n = node("p", "note"); n.append(node("b", null, "Giả thiết:"), document.createTextNode(" " + m.assumptions.join(" "))); s2.append(n); }
+    const s3 = $("#g-s3");
+    s3.replaceChildren();
+    if (m.solution.length) s3.append(listOf(m.solution, true));
+    if (m.answer) s3.append(node("div", "verdict info", "Đáp số theo đề: " + m.answer));
+    const s4 = $("#g-s4");
+    s4.replaceChildren();
+    if (m.reality.length) s4.append(listOf(m.reality));
+    if (m.experiment) { const e = node("p"); e.append(node("b", null, "Cách kiểm chứng: "), document.createTextNode(m.experiment)); s4.append(e); }
+    $("#g-probe-l").replaceChildren(node("var", null, m.vsym), document.createTextNode(" " + (m.vname || "đang xét")));
+  }
+
+  function load(m) {
+    model = m;
+    env = Object.create(null);
+    for (const p of m.params) env[p.sym] = p.value;
+    buildParams();
+    updateRange(true);
+    fillSteps();
+    refresh();
+  }
+
+  function setImg(f) {
+    if (f && imgLimits) {
+      if (imgLimits.mediaTypes && !imgLimits.mediaTypes.includes(f.type)) { setStatus("warn", "Ảnh cần ở dạng JPG, PNG, WebP hoặc HEIC."); return; }
+      if (imgLimits.maxInputBytes && f.size > imgLimits.maxInputBytes) { setStatus("warn", "Ảnh quá lớn, hãy chọn ảnh nhỏ hơn."); return; }
+    }
+    img = f || null;
+    imgRow.hidden = !img;
+    imgName.textContent = img ? "Ảnh đề: " + (img.name || "ảnh dán vào") : "";
+  }
+
+  /* ----- Cài đặt và gọi Gemini ----- */
+  const settings = $("#g-settings"), keyIn = $("#g-key"), modelSel = $("#g-model"), modelCustom = $("#g-model-custom");
+  const remember = $("#g-remember"), keyState = $("#g-key-state");
+  const LS = {
+    get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* trình duyệt chặn lưu */ } },
+    del: k => { try { localStorage.removeItem(k); } catch (e) { /* bỏ qua */ } }
+  };
+  let apiKey = LS.get(KEY_STORE) || "";
+  function currentModel() {
+    const v = modelSel.value === "custom" ? modelCustom.value.trim() : modelSel.value;
+    return /^[A-Za-z0-9._-]{3,80}$/.test(v) ? v : DEFAULT_MODEL;
+  }
+  function showKeyState() {
+    if (PROXY_URL) setPill(keyState, "good", "máy chủ trung gian");
+    else if (apiKey) setPill(keyState, "good", "đã có khóa");
+    else setPill(keyState, "warn", "chưa có khóa");
+  }
+  function errText(status, msg) {
+    const m = String(msg || "");
+    if (status === 400 && /api.?key/i.test(m)) return "Khóa API không hợp lệ. Kiểm tra lại khóa trong mục “Cài đặt Gemini”.";
+    if (status === 400) return "Gemini không nhận yêu cầu: " + m.slice(0, 160);
+    if (status === 401 || status === 403) return "Khóa API không có quyền dùng Gemini. Kiểm tra lại khóa hoặc dự án trong Google AI Studio.";
+    if (status === 404) return "Không tìm thấy mô hình “" + currentModel() + "”. Chọn mô hình khác trong mục “Cài đặt Gemini”.";
+    if (status === 413) return "Ảnh hoặc đề quá lớn. Chọn ảnh nhỏ hơn.";
+    if (status === 429) return "Đã hết lượt dùng hoặc gửi quá nhanh. Đợi một lúc rồi bấm lại.";
+    if (status >= 500) return "Máy chủ Gemini đang bận. Đợi một lát rồi bấm lại.";
+    return "Không gọi được Gemini" + (m ? ": " + m.slice(0, 160) : ".");
+  }
+  async function imageToPart(file) {
+    let blob = file, type = file.type || "image/jpeg";
+    try {
+      /* Thu nhỏ ảnh chụp điện thoại về cạnh dài 1600 px cho nhanh và nhẹ */
+      const bmp = await createImageBitmap(file);
+      const k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+      const cv = document.createElement("canvas");
+      cv.width = Math.round(bmp.width * k);
+      cv.height = Math.round(bmp.height * k);
+      cv.getContext("2d").drawImage(bmp, 0, 0, cv.width, cv.height);
+      if (bmp.close) bmp.close();
+      const b = await new Promise(res => cv.toBlob(res, "image/jpeg", 0.9));
+      if (b) { blob = b; type = "image/jpeg"; }
+    } catch (e) { /* trình duyệt không giải mã được (ví dụ HEIC): gửi nguyên ảnh */ }
+    const data = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(String(r.result).split(",")[1] || "");
+      r.onerror = () => rej(new Error("Không đọc được ảnh. Thử ảnh khác."));
+      r.readAsDataURL(blob);
+    });
+    return { inline_data: { mime_type: type, data } };
+  }
+  function extractJSON(text) {
+    const t = String(text).trim();
+    try { return JSON.parse(t); } catch (e) { /* thử cách khác */ }
+    const fence = /```(?:json)?\s*([\s\S]*?)```/i.exec(t);
+    if (fence) { try { return JSON.parse(fence[1]); } catch (e) { /* thử cách khác */ } }
+    const a = t.indexOf("{"), b = t.lastIndexOf("}");
+    if (a >= 0 && b > a) { try { return JSON.parse(t.slice(a, b + 1)); } catch (e) { /* hết cách */ } }
+    throw new Error("Gemini trả lời chưa đúng khuôn. Bấm “Dựng mô hình” để thử lại.");
+  }
+  async function callGemini(prompt, imageFile, signal) {
+    const parts = [{ text: prompt }];
+    if (imageFile) parts.push(await imageToPart(imageFile));
+    const contents = [{ role: "user", parts }];
+    const model = currentModel();
+    const res = PROXY_URL
+      ? await fetch(PROXY_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model, contents }), signal })
+      : await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(model) + ":generateContent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+          body: JSON.stringify({ contents }),
+          signal
+        });
+    let json = null;
+    try { json = await res.json(); } catch (e) { /* phản hồi không phải JSON */ }
+    if (!res.ok) throw new Error(errText(res.status, json && json.error && json.error.message));
+    const cand = json && Array.isArray(json.candidates) ? json.candidates[0] : null;
+    if (!cand) {
+      const br = json && json.promptFeedback && json.promptFeedback.blockReason;
+      throw new Error(br ? "Gemini từ chối xử lý đề này. Thử diễn đạt lại đề." : "Gemini không trả lời. Bấm lại sau ít phút.");
+    }
+    const text = ((cand.content && cand.content.parts) || []).filter(p => p && typeof p.text === "string" && !p.thought).map(p => p.text).join("");
+    if (!text.trim()) throw new Error(cand.finishReason === "SAFETY" ? "Gemini từ chối xử lý đề này. Thử diễn đạt lại đề." : "Gemini trả lời trống. Bấm lại sau ít phút.");
+    return extractJSON(text);
+  }
+
+  async function go() {
+    if (!PROXY_URL && !apiKey) {
+      setStatus("warn", "Chưa có khóa API Gemini. Mở mục “Cài đặt Gemini” ở trên để nhập khóa.");
+      settings.open = true;
+      keyIn.focus();
+      return;
+    }
+    const text = box.value.trim().slice(0, 4000);
+    if (!text && !img) { setStatus("warn", "Dán đề bài hoặc chọn ảnh đề trước đã."); box.focus(); return; }
+    ctl = new AbortController();
+    runBtn.disabled = true;
+    stopBtn.hidden = false;
+    setStatus("info", "Gemini đang đọc đề và lập mô hình… thường mất 5 đến 40 giây.");
+    try {
+      const raw = await callGemini(buildPrompt(text, !!img), img, ctl.signal);
+      const m = normalizeModel(raw);
+      if (m.unsupported) { setStatus("warn", "Chưa dựng được: " + m.reason); return; }
+      load(m);
+      setStatus("good", "Đã dựng xong. Kéo các thanh trượt và xem từng bước bên cạnh.");
+    } catch (e) {
+      const msg = e && e.message ? e.message : "";
+      if (e && e.name === "AbortError") setStatus("info", "Đã dừng.");
+      else if (e instanceof TypeError) setStatus("warn", "Không kết nối được tới " + (PROXY_URL ? "máy chủ trung gian" : "Gemini") + ". Kiểm tra mạng rồi thử lại.");
+      else if (/^(Công thức|Câu trả lời|Gemini chưa đưa)/.test(msg)) setStatus("warn", "Chưa dựng được mô hình: " + msg + ". Bấm “Dựng mô hình” để thử lại.");
+      else setStatus("warn", msg || "Có lỗi không rõ. Bấm “Dựng mô hình” để thử lại.");
+    } finally {
+      stopBtn.hidden = true;
+      runBtn.disabled = false;
+      ctl = null;
+    }
+  }
+
+  $$(".chip[data-ex]").forEach(c => c.addEventListener("click", () => { box.value = EXAMPLES[+c.dataset.ex]; setImg(null); box.focus(); }));
+  runBtn.addEventListener("click", go);
+  stopBtn.addEventListener("click", () => { if (ctl) ctl.abort(); });
+  inP.addEventListener("input", () => { probe = +inP.value; refresh(); });
+  $("#g-reset").addEventListener("click", () => {
+    for (const p of model.params) { env[p.sym] = p.init; p.input.value = String(p.init); p.out.textContent = withUnit(p.init, p.unit); }
+    updateRange(false);
+    refresh();
+  });
+  imgBtn.addEventListener("click", () => imgIn.click());
+  imgIn.addEventListener("change", () => { const f = imgIn.files && imgIn.files[0]; if (f) setImg(f); imgIn.value = ""; });
+  $("#g-img-clear").addEventListener("click", () => setImg(null));
+  box.addEventListener("paste", e => {
+    if (!imgLimits || !e.clipboardData) return;
+    const it = Array.from(e.clipboardData.items || []).find(x => x.kind === "file" && x.type.startsWith("image/"));
+    const f = it && it.getAsFile();
+    if (f) { e.preventDefault(); setImg(f); }
+  });
+
+  load(normalizeModel(EXAMPLE_RAW));
+  box.value = EXAMPLES[1];
+  setStatus("info", "Đang hiển thị ví dụ dựng sẵn. Dán đề của em vào ô trên rồi bấm “Dựng mô hình”.");
+  /* Cài đặt */
+  const savedModel = LS.get(MODEL_STORE) || DEFAULT_MODEL;
+  if (Array.from(modelSel.options).some(o => o.value === savedModel)) modelSel.value = savedModel;
+  else { modelSel.value = "custom"; modelCustom.value = savedModel; }
+  modelCustom.hidden = modelSel.value !== "custom";
+  keyIn.value = apiKey;
+  modelSel.addEventListener("change", () => { modelCustom.hidden = modelSel.value !== "custom"; if (!modelCustom.hidden) modelCustom.focus(); });
+  $("#g-key-toggle").addEventListener("click", () => {
+    const show = keyIn.type === "password";
+    keyIn.type = show ? "text" : "password";
+    $("#g-key-toggle").textContent = show ? "Ẩn" : "Hiện";
+  });
+  $("#g-save").addEventListener("click", () => {
+    if (!PROXY_URL) {
+      apiKey = keyIn.value.trim();
+      if (apiKey && remember.checked) LS.set(KEY_STORE, apiKey); else LS.del(KEY_STORE);
+    }
+    LS.set(MODEL_STORE, currentModel());
+    showKeyState();
+    setStatus("good", PROXY_URL || apiKey ? "Đã lưu cài đặt. Bấm “Dựng mô hình” để thử." : "Đã lưu mô hình. Nhớ nhập khóa API trước khi dựng.");
+  });
+  $("#g-forget").addEventListener("click", () => {
+    apiKey = "";
+    keyIn.value = "";
+    LS.del(KEY_STORE);
+    showKeyState();
+    setStatus("info", "Đã xóa khóa khỏi trình duyệt này.");
+  });
+  if (PROXY_URL) { $("#g-key-fields").hidden = true; $("#g-forget").hidden = true; $("#g-proxy-note").hidden = false; }
+  imgBtn.hidden = false;
+  showKeyState();
+  settings.open = !PROXY_URL && !apiKey;
+  return {};
+})();
+
+/* ---------- Chu trình 4 bước ---------- */
+$$(".cycle").forEach(cy => {
+  const btns = $$(".steps button", cy), panes = $$(".step", cy), prev = $(".prev", cy), next = $(".next", cy);
+  let cur = 1;
+  function go(n) {
+    cur = n;
+    btns.forEach(b => b.setAttribute("aria-current", +b.dataset.step === n ? "step" : "false"));
+    panes.forEach(p => { p.hidden = +p.dataset.step !== n; });
+    prev.disabled = n === 1;
+    next.textContent = n === 4 ? "↺ Quay lại bước 2: chỉnh mô hình" : "Bước tiếp →";
+  }
+  btns.forEach(b => b.addEventListener("click", () => go(+b.dataset.step)));
+  prev.addEventListener("click", () => go(Math.max(1, cur - 1)));
+  next.addEventListener("click", () => go(cur === 4 ? 2 : cur + 1));
+  go(1);
+});
+
+/* ---------- Chọn bài theo địa chỉ #… ---------- */
+const KEYS = ["nem-bong", "du-quay", "hop-giay", "de-moi"];
+function route() {
+  let k = (location.hash || "").slice(1);
+  if (!KEYS.includes(k)) k = "nem-bong";
+  $$(".problem").forEach(s => { s.hidden = s.dataset.key !== k; });
+  $$(".tab").forEach(a => { if (a.dataset.key === k) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  if (k !== "du-quay") Wm.pause();
+}
+window.addEventListener("hashchange", route);
+route();
+})();
+</script>
+</body>
+</html>
